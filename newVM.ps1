@@ -73,21 +73,21 @@ if (!$windows) {
 }
 
 #ensure image downloaded and converted to vhdx
-$sourceVHDX= & .\scripts\downloadImage.ps1 -os $os -windows $windows
+$sourceVHDX = & .\scripts\downloadImage.ps1 -os $os -windows $windows
 
-$defaultHostname= If ($windows) {$options[$prompt].Label} Else {$(Split-Path -Path $sourceVHDX -Leaf).Replace("-source.vhdx", "").Replace(".", "")}
+$defaultHostname = If ($windows) { $options[$prompt].Label } Else { $(Split-Path -Path $sourceVHDX -Leaf).Replace("-source.vhdx", "").Replace(".", "") }
 $hostname = & .\scripts\PromptHostname.ps1 -defaultHostname $defaultHostname
 
 $vmFolder = Join-Path $hostVMFolder $hostname
-$vm=& .\scripts\createVM.ps1 -vmName $hostname -vmFolder "$vmFolder"  -vhdx "$sourceVHDX" -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false 
+$vm = & .\scripts\createVM.ps1 -vmName $hostname -vmFolder "$vmFolder"  -vhdx "$sourceVHDX" -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false 
 
 
 $vhdx = $(Get-VMHardDiskDrive -VMName $hostname).Path
-$mntID=[System.Guid]::NewGuid().ToString()
+$mntID = [System.Guid]::NewGuid().ToString()
 Write-Host "Mounting $vhdx to /mnt/wsl/$mntID"
 $mntCmd = wsl --mount --vhd "$vhdx" -p ($os -like "alma*" ? 4:1) --name "$mntID"
 if ($LASTEXITCODE -ne 0) {
-    throw "$mntCmd"
+  throw "$mntCmd"
 }
 $mntCmd
 
@@ -105,15 +105,13 @@ Start-VM -Name $hostname
 wt --title "sensie-build_$hostname" hvc.exe serial $hostname
 
 & .\scripts\pollBuildProgress.ps1 -vmName $hostname -windows $windows
-
 & .\scripts\shutdownVM.ps1 -vmName $hostname
 Set-VM -CheckpointType Production -Name $hostname
 Checkpoint-VM -SnapshotName "sensie build snap before first boot" -Name $hostname
 
-#
-#$startVm = Read-Host "Connect to VM $($hostname)? (y/n)"
-#
+$startVm = Read-Host "Connect to VM $($hostname)? (y/n)"
 if ($startVm -eq 'y' -or [string]::IsNullOrEmpty($startVm)) {
   Start-VM -Name $hostname
-#  Start-Process "vmconnect" "localhost", "$hostname"
+  wt --title "sensie-build_$hostname" hvc.exe serial $hostname
+  #Start-Process "vmconnect" "localhost", "$hostname"
 }
