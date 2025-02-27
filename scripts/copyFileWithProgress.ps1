@@ -1,9 +1,15 @@
 param (
-    [Parameter(mandatory=$true)]
+    [Parameter(mandatory = $true)]
     [string]$sourcePath,
-    [Parameter(mandatory=$true)]
+    [Parameter(mandatory = $true)]
     [string]$destinationPath
 )
+
+#if $destinationPath is a directory, append the filename from the source path
+if (Test-Path -Path $destinationPath -PathType Container) {
+    $filename = Split-Path -Path $sourcePath -Leaf
+    $destinationPath = Join-Path -Path $destinationPath -ChildPath $filename
+} 
 
 $sourceFile = Get-Item -Path $sourcePath
 $totalSize = $sourceFile.Length
@@ -27,8 +33,12 @@ try {
             $lastPercentComplete = $percentComplete
         }
     }
-} finally {
+}
+catch { throw "Error copying file: $_" }
+finally {
     $sourceStream.Close()
     $destinationStream.Close()
 }
+
+return $destinationPath
 

@@ -1,5 +1,5 @@
 Based on https://github.com/schtritoff/hyperv-vm-provisioning - many thanks indeed - PowerShell scripts to build some Hyper-V VMs.
 
-Cloud-Init is used to install a standard set of apps for Linux machines and requires a web server to host Cloud-Init files.
+Cloud-Init and Ansible install a standard set of apps for Linux machines. Node-Red returns the latest version of each distro. 
 
 Windows machines are built from WDS. 

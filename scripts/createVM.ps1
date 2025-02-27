@@ -39,7 +39,16 @@ if(!($PSBoundParameters.ContainsKey('bWindows'))) {$bWindows = $false}
 if(!($PSBoundParameters.ContainsKey('bStartVM'))) {$bStartVM = $true}
 
 #delete the VM if it exists
+& .\scripts\closeWindow.ps1 -windowTitleToMatch $($vmName + " * Virtual Machine Connection")
 & .\scripts\removeVM.ps1 $vmName
+
+#ensure vm dir exists and is empty
+if (Test-Path $vmFolder) { Remove-Item -LiteralPath "$vmFolder" -Force -Recurse }
+New-Item -Path $vmFolder -ItemType Directory  > $null
+
+Write-host "copying source vhdx to vm folder"
+$vhdx=& .\scripts\copyFileWithProgress.ps1 -sourcePath "$vhdx" -destinationPath "$vmFolder"
+
 
 Write-Host "creating VM $vmName"
 $vm = new-vm -Name $vmName -MemoryStartupBytes $vmMemoryStartupBytes `

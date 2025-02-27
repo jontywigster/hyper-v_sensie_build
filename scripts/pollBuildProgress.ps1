@@ -64,11 +64,11 @@ function getWindowsKVPBuildStatus {
 function prettyPrint($buildStatus) {
   switch ($buildStatus) {
        "no gei" {$pretty="Waiting for OS"; Break }
-       "base" {$pretty="Base apps install"; Break }
+       "base" {$pretty="Ansible build"; Break }
        "circ" {$pretty="cloud-init started"; Break }
        "dock" {$pretty="Docker install"; Break }
        "done" {$pretty="done"; Break }
-       "inan" {$pretty="Ansible install "; Break }
+       "inan" {$pretty="cloud-init runcmd"; Break }
        "rena" {$pretty="Rename host"; Break }
   }
   return $pretty

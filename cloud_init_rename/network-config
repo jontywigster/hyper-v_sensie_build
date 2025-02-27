@@ -1,9 +1,0 @@
-#version: 2
-#ethernets:
-#  eth0:
-#    match:
-#      macaddress: 00:15:5d:00:c8:c1
-#    set-name: eth0
-#    dhcp4: true
-#    dhcp-identifier: mac
-

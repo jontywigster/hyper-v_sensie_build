@@ -1,2 +1,79 @@
-#include
-https://nr.oc.baltsch.com/ci/x64/{os}/{hostname}/{ansiblePlay}/
+#cloud-config
+
+manage_etc_hosts: true
+locale: en_US.UTF-8
+
+timezone: Europe/Berlin
+
+ssh_pwauth: false
+ssh_genkeytypes: [rsa, ecdsa, ed25519]
+
+#requires packages for some OSs
+keyboard:
+  layout: de
+  model: pc105
+  variant: nodeadkeys
+  options: compose:rwin
+
+users:
+  - name: wigster
+    groups: [sudo]
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    plain_text_passwd: ThisPasswordWillNeverBeUsedSSHOnlyInstead
+    shell: /usr/bin/bash
+    ssh_authorized_keys:
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPZgb/7zvi87gK/f32x1fL3U78F7C6assq6gT5jJw7X+ wigster-eddsa-key-internal-hosts"
+
+write_files:
+ - content: |
+     \n (\S)
+     eth0:\4{eth0}, \6{eth0}
+   path: /etc/issue
+   owner: root:root
+   permissions: '0644'
+ - content: |
+     syntax on
+     colorscheme evening
+   path: /root/.vimrc
+   owner: root:root
+   permissions: '0644'
+
+disable_root: true
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - git
+  - nano
+  - vim
+  - tmux
+  - mc
+  - dos2unix
+{packagesPerOS}
+
+cloud_config_modules:
+  - package_update_upgrade_install  
+  - timezone
+  - keyboard
+
+cloud_final_modules:
+  - runcmd
+  - scripts-user
+
+runcmd:
+  - printf "sensie_build%0500dinan%02044d" | tr '0' '\0' > /var/lib/hyperv/.kvp_pool_1
+  - [ cp, /root/.vimrc, /home/wigster/.vimrc ]
+  - [ chown, wigster:wigster, /home/wigster/.vimrc ]
+  - which apt && apt -y remove walinuxagent
+  - which apt && rm -rf /var/lib/waagent
+  - which apt && rm -f /var/log/waagent.log
+  - which dnf && localectl set-keymap de
+  - which dnf && dnf config-manager --set-enabled crb; dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm; dnf install -y htop ansible
+  - ansible-pull -i {hostname}, -d /opt/sensie_build -U https://github.com/jontywigster/sensie_build.git -e build={buildType}
+
+
+
+
+
+
