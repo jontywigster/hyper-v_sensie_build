@@ -2,4 +2,6 @@ Based on https://github.com/schtritoff/hyperv-vm-provisioning - many thanks inde
 
 Cloud-Init and Ansible install a standard set of apps for Linux machines. Node-Red returns the latest version of each distro. 
 
-Windows machines are built from WDS. 
+The dependency on Node-Red can be overidden by setting params in build.env.
+
+An ISO for Windows machines is downloaded and converted to a VHDX
