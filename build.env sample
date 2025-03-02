@@ -1,0 +1,32 @@
+#ubuntu AZ has trouble shutting down when asked to be Hyper-V   
+#shutdown via ssh instead
+LINUX_VM_SSH_KEY_PATH='full path to private key'
+LINUX_VM_SSH_USER='username to use in linux vm'
+
+#if below are set, nr will not be contacted
+#URL_alma='https://repo.almalinux.org/almalinux/9.5/cloud/x86_64/images/AlmaLinux-9-GenericCloud-latest.x86_64.qcow2'
+#VERSION_alma='9.5'
+
+#URL_debian='https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2'
+#VERSION_debian='12'
+
+#URL_debianAz='https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-azure-amd64.tar.xz'
+#VERSION_debianAz='12'
+
+#URL_ubuntu='https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-amd64.img'
+#VERSION_ubuntu='2404'
+
+#URL_ubuntuAz='https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-amd64-azure.vhd.tar.gz'
+#VERSION_ubuntuAz='2404'
+
+#URL_25s='https://dsnoe.phys.baltsch.com:999/images/windows/iso/2025_ge_26100.1742.iso'
+#VERSION_25s='2025_ge_26100.1742'
+
+#URL_25d='https://dsnoe.phys.baltsch.com:999/images/windows/iso/2025_ge_26100.1742.iso'
+#VERSION_25s='2025_ge_26100.1742'
+
+#URL_25sc='https://dsnoe.phys.baltsch.com:999/images/windows/iso/2025_ge_26100.1742.iso'
+#VERSION_25s='2025_ge_26100.1742'
+
+#URL_25dc='https://dsnoe.phys.baltsch.com:999/images/windows/iso/2025_ge_26100.1742.iso'
+#VERSION_25s='2025_ge_26100.1742'
