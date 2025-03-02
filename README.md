@@ -4,4 +4,4 @@ Cloud-Init and Ansible install a standard set of apps for Linux machines. Node-R
 
 The dependency on Node-Red can be overidden by setting params in build.env.
 
-An ISO for Windows machines is downloaded and converted to a VHDX
+An ISO for Windows machines is downloaded and converted to a VHDX, removing dependency on WDS
