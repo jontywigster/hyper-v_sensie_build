@@ -42,15 +42,9 @@ do {
   $options = [System.Management.Automation.Host.ChoiceDescription[]]$aOS
   $prompt = $host.ui.PromptForChoice($msg, "", $options, -1)
   $os = $options[$prompt].Label -replace "^&\d+\s", ""
+  $windows = $options[$prompt].HelpMessage -match "Windows"
 
   $confirmation = Read-Host "$os selected. Continue? (y or empty /n) n will prompt again"
-  if ($confirmation -eq "y" -or $confirmation -eq "") {
-    $windows = $($options[$prompt].HelpMessage.ToLower().Contains(" windows "))
-    if ($windows) {
-      $os = ($options[$prompt].HelpMessage -split ' ')[-1]
-    }
-  }
-
 } while ($confirmation -ne "y" -and $confirmation -ne "")
 
 Write-Host "os is $os"
@@ -72,37 +66,47 @@ if (!$windows) {
   $bInstallDocker = promptInstallDocker
 }
 
-#ensure image downloaded and converted to vhdx
+#ensure image downloaded, and converted to vhdx
 $sourceVHDX = & .\scripts\downloadImage.ps1 -os $os -windows $windows
 
 $defaultHostname = If ($windows) { $options[$prompt].Label } Else { $(Split-Path -Path $sourceVHDX -Leaf).Replace("-source.vhdx", "").Replace(".", "") }
 $hostname = & .\scripts\PromptHostname.ps1 -defaultHostname $defaultHostname
 
-$vmFolder = Join-Path $hostVMFolder $hostname
-$vm = & .\scripts\createVM.ps1 -vmName $hostname -vmFolder "$vmFolder"  -vhdx "$sourceVHDX" -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false 
-
-
-$vhdx = $(Get-VMHardDiskDrive -VMName $hostname).Path
-$mntID = [System.Guid]::NewGuid().ToString()
-Write-Host "Mounting $vhdx to /mnt/wsl/$mntID"
-$mntCmd = wsl --mount --vhd "$vhdx" -p ($os -like "alma*" ? 4:1) --name "$mntID"
-if ($LASTEXITCODE -ne 0) {
-  throw "$mntCmd"
+if ($windows) {
+  $adminPwd = Read-Host "Enter Windows admin pwd"
 }
-$mntCmd
 
-&".\scripts\wslSeedCloudInit.ps1" -mntID $mntID -hostname $hostname -os $os -buildType $bInstallDocker
+$vmFolder = Join-Path $hostVMFolder $hostname
+& .\scripts\createVM.ps1 -vmName $hostname -vmFolder "$vmFolder"  -vhdx "$sourceVHDX" -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false -bWindows $windows
+$vhdx = $(Get-VMHardDiskDrive -VMName $hostname).Path
 
-#Write-Host "Entering image chrooted to /mnt/wsl/$mntID. ctrl+d to exit" -f Green
-#wsl -u root chroot /mnt/wsl/$mntID
-write-host "will unmount - "
-write-host "wsl --unmount \\?\$vhdx"
-wsl --unmount \\?\$vhdx
+if ($windows) {
+  & .\scripts\injectWinUnattend.ps1 -vhdx $vhdx -os $os -hostname $hostname -adminPwd $adminPwd
+}
+else {
+  $mntID = [System.Guid]::NewGuid().ToString()
+  Write-Host "Mounting $vhdx to /mnt/wsl/$mntID"
+  $mntCmd = wsl --mount --vhd "$vhdx" -p ($os -like "alma*" ? 4:1) --name "$mntID"
+  if ($LASTEXITCODE -ne 0) {
+    throw "$mntCmd"
+  }
+  $mntCmd
+  
+  &".\scripts\wslSeedCloudInit.ps1" -mntID $mntID -hostname $hostname -os $os -buildType $bInstallDocker
+  
+  #Write-Host "Entering image chrooted to /mnt/wsl/$mntID. ctrl+d to exit" -f Green
+  #wsl -u root chroot /mnt/wsl/$mntID
+  write-host "will unmount - "
+  write-host "wsl --unmount \\?\$vhdx"
+  wsl --unmount \\?\$vhdx
+}
 
 
 Start-VM -Name $hostname
-#call hvc explicitly so window is closed automatically
-wt --title "sensie-build_$hostname" hvc.exe serial $hostname
+if (!$windows) {
+  #call hvc explicitly so window is closed automatically
+  wt --title "sensie-build_$hostname" hvc.exe serial $hostname
+}
 
 & .\scripts\pollBuildProgress.ps1 -vmName $hostname -windows $windows
 & .\scripts\shutdownVM.ps1 -vmName $hostname

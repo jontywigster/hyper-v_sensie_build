@@ -44,7 +44,7 @@ wsl -u root -- cp -r "$localSeedPath/." "$vmSeedPath"
 $sedCommand = 's/{hostname}/' + $hostname + '/g'
 wsl -u root -- sed -i -e $sedCommand $vmSeedPath/*
 
-$packagesPerOS = . .\scripts\packages_per_os.ps1
+$packagesPerOS = . .\scripts\packagesPerOS.ps1
 $osPackages = $packagesPerOS[$os]
 $osPackagesString = [string]::Join("`n  - ", $osPackages)
 $osPackagesString = "  - " + $osPackagesString + "`n"

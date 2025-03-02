@@ -20,7 +20,7 @@ try {
 } catch {
 
     #vm-stop for ubuntuAz unreliable. Issue shutdown command via SSH
-    . .\scripts\getSecrets.ps1
+    . .\scripts\getEnvVars.ps1
     $sshKeyPath = $LINUX_VM_SSH_KEY_PATH
     $sshUser = $LINUX_VM_SSH_USER
     $shutdownCommand = "sudo shutdown -h now"
@@ -35,7 +35,7 @@ try {
     Write-Output "Waiting for VM to shut down..."
     while ((Get-VMState -vmName $hostname) -ne 'Off') {
     Start-Sleep -Seconds 5
-    echo "."
+    Write-Host "."
     }
 
     Write-Output "VM is now shut down."
