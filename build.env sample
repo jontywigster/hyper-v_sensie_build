@@ -1,4 +1,4 @@
-#ubuntu AZ has trouble shutting down when asked to be Hyper-V   
+#ubuntu AZ has trouble shutting down when asked to by Hyper-V   
 #shutdown via ssh instead
 LINUX_VM_SSH_KEY_PATH='full path to private key'
 LINUX_VM_SSH_USER='username to use in linux vm'
