@@ -45,7 +45,7 @@ wsl -u root -- bash -c "if [ ! -d '$vmSeedPath' ]; then mkdir -p '$vmSeedPath'; 
 wsl -u root -- rm -rfv $mntPath/var/lib/cloud/seed/nocloud/*
 
 $localSeedPath = (Join-Path $parentDirectory "cloud_init_seed")
-$localSeedPath = wsl -u root -- wslpath -a "$localSeedPath"
+$localSeedPath = wsl bash -c "wslpath -a -u '$localSeedPath'"
 
 wsl -u root -- cp -r "$localSeedPath/." "$vmSeedPath"
 
