@@ -84,23 +84,8 @@ if ($windows) {
   & .\scripts\injectWinUnattend.ps1 -vhdx $vhdx -os $os -hostname $hostname -adminPwd $adminPwd
 }
 else {
-  $mntID = [System.Guid]::NewGuid().ToString()
-  Write-Host "Mounting $vhdx to /mnt/wsl/$mntID"
-  $mntCmd = wsl --mount --vhd "$vhdx" -p ($os -like "alma*" ? 4:1) --name "$mntID"
-  if ($LASTEXITCODE -ne 0) {
-    throw "$mntCmd"
-  }
-  $mntCmd
-  
-  &".\scripts\wslSeedCloudInit.ps1" -mntID $mntID -hostname $hostname -os $os -buildType $bInstallDocker
-  
-  #Write-Host "Entering image chrooted to /mnt/wsl/$mntID. ctrl+d to exit" -f Green
-  #wsl -u root chroot /mnt/wsl/$mntID
-  write-host "will unmount - "
-  write-host "wsl --unmount \\?\$vhdx"
-  wsl --unmount \\?\$vhdx
+  & ".\scripts\wslSeedCloudInit.ps1" -hostname $hostname -os $os -buildType $bInstallDocker
 }
-
 
 Start-VM -Name $hostname
 if (!$windows) {

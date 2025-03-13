@@ -6,8 +6,6 @@ add ds nocloud, pointing to own http server
 [CmdletBinding()]
 param(
   [Parameter(mandatory = $true)]
-  [string] $mntID,
-  [Parameter(mandatory = $true)]
   [string] $hostname,
   [Parameter(mandatory = $true)]
   [string] $os,
@@ -17,6 +15,18 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+$parentDirectory = Split-Path -Path $PSScriptRoot -Parent
+$ciCfgPath = (Join-Path $parentDirectory "cloud_init_cfg")
+$ciCfgPath = wsl -u root -- wslpath -a "$ciCfgPath"
+
+$mntID = [System.Guid]::NewGuid().ToString()
+Write-Host "Mounting $vhdx to /mnt/wsl/$mntID"
+$mntCmd = wsl --mount --vhd "$vhdx" -p ($os -like "alma*" ? 4:1) --name "$mntID"
+if ($LASTEXITCODE -ne 0) {
+  throw "$mntCmd"
+}
+$mntCmd
+
 $mntPath = "/mnt/wsl/$mntID"
 
 Write-Host "seed cloud-init"
@@ -25,9 +35,7 @@ Write-Host "seed cloud-init"
 wsl -u root -- rm -fv $mntPath/etc/cloud/cloud.cfg.d/*.cfg
 
 #add config files
-$parentDirectory = Split-Path -Path $PSScriptRoot -Parent
-$ciCfgPath = (Join-Path $parentDirectory "cloud_init_cfg")
-$ciCfgPath = wsl -u root -- wslpath -a "$ciCfgPath"
+
 wsl -u root -- cp -r "$ciCfgPath/." $mntPath/etc/cloud/cloud.cfg.d/
 
 #create seed dir
@@ -55,3 +63,9 @@ wsl -u root -- sed -i -e $sedCommand --posix $vmSeedPath/user-data
 wsl -u root -- sed -i -e "s/{buildType}/$buildType/g" $vmSeedPath/user-data
 wsl -u root -- sed -i -e "s/{hostname}/$hostname/g" $vmSeedPath/user-data
 
+#Write-Host "Entering image chrooted to /mnt/wsl/$mntID. ctrl+d to exit" -f Green
+#wsl -u root chroot /mnt/wsl/$mntID
+
+write-host "will unmount - "
+write-host "wsl --unmount \\?\$vhdx"
+wsl --unmount \\?\$vhdx
