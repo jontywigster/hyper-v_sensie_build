@@ -77,28 +77,28 @@ if ($windows) {
 }
 
 
-#prompt for h-v switch
+#prompt for vswitch
 $vSwitches = Get-VMSwitch | Select-Object -ExpandProperty Name
+if ($vSwitches -isnot [System.Array]) { $vSwitches = @($vSwitches) }
+$vSwitch = $null
 
-for ($i = 0; $i -lt $vSwitches.Count; $i++) {
-    Write-Host "$($i + 1): $($vSwitches[$i])"
-}
-
+for ($i = 0; $i -lt $vSwitches.Count; $i++) { Write-Host "$($i + 1): $($vSwitches[$i])" }
 do {
-    $selection = Read-Host "Enter the number corresponding to the virtual switch"
+  $selection = Read-Host "Enter vswitch number"
+  if (-not [string]::IsNullOrWhiteSpace($selection) -and $selection -as [int]) {
     $index = [int]$selection - 1
-    if ($index -lt 0 -or $index -ge $vSwitches.Count) {
-        Write-Host "Invalid selection. Please enter a number between 1 and $($vSwitches.Count)." -ForegroundColor Red
+    if ($index -ge 0 -and $index -lt $vSwitches.Count) {
+      $vSwitch = $vSwitches[$index]
     }
-} while ($index -lt 0 -or $index -ge $vSwitches.Count)
-
-$vSwitch = $vSwitches[$index]
+  }
+  if ($null -eq $vSwitch) { Write-Host "Invalid, enter again"  }
+} while ($null -eq $vSwitch)
 
 #prompt for vlan
-$vlan = Read-Host "Enter VLAN ID (or press Enter for none)"
+$vlan = Read-Host "Enter vlan id or press enter for none"
+$vlan = if ([string]::IsNullOrWhiteSpace($vlan)) { "" } else { $vlan }
 
-if ([string]::IsNullOrWhiteSpace($vlan)) { $vlan = "" }
-
+#create vm
 $vmFolder = Join-Path $hostVMFolder $hostname
 & .\scripts\createVM.ps1 -vmName $hostname -vmFolder "$vmFolder"  -vhdx "$sourceVHDX" -vSwitch $vSwitch -vlan $vlan -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false -bWindows $windows
 $vhdx = $(Get-VMHardDiskDrive -VMName $hostname).Path
