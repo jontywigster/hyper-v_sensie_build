@@ -47,9 +47,9 @@ if ( ($vhdProps.BlockSize -ne 1048576) -or ($vhdProps.VhdType -ne "Dynamic")) {
 
 #resize to 50 gigs if smaller
 $vhdxMaxSize=(Get-VHD -Path "$sourceVHD").size/1GB
-if ($vhdxMaxSize -lt 50) {
-  Write-Host 'resize vhdx to 50 gigs'
-  Resize-VHD -Path $sourceVHD -SizeBytes 50GB
+if ($vhdxMaxSize -lt 100) {
+  Write-Host 'resize vhdx'
+  Resize-VHD -Path $sourceVHD -SizeBytes 100GB
 }
 
 #optimize

@@ -33,7 +33,7 @@ if (-not $mountedDriveLetter) {
 $mountedDriveLetterPath = $mountedDriveLetter + ":\"
 
 # Create the VHDX
-$SizeBytes = "60GB"
+$SizeBytes = "100GB"
 New-VHD -Path $outputVHDX -Dynamic -SizeBytes $SizeBytes
 Mount-VHD -Path $outputVHDX
 $vhd = Get-Disk | Where-Object { $_.Location -eq "$outputVHDX" }

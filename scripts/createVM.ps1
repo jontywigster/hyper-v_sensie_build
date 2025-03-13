@@ -14,10 +14,11 @@ param(
   [uint64] $vmMemoryStartupBytes = 2048MB,
   [uint64] $vmMinimumBytes = 1024MB,
   [uint64] $vmMaximumBytes = 8192MB,
-  [uint64] $VHDSizeBytes = 40GB,
+  [uint64] $VHDSizeBytes = 100GB,
   [string] $VirtualSwitchName = "ext wifi",
   [switch] $DisableVMMacAddressSpoofing,
   [string] $NetInterface = "eth0",
+  [string] $vlan = "1020",
   #new vm params
   [Parameter(mandatory=$true)]
   [string] $vmName,
@@ -68,14 +69,18 @@ Write-Verbose "Add nic"
 if ([string]::IsNullOrEmpty($virtualSwitchName)) {
   throw "vswitch not specified, please use parameter -virtualSwitchName 'Switch Name'."
 } else {
-  #Get-VMNetworkAdapter -VMName $vmName | Connect-VMNetworkAdapter -SwitchName "$virtualSwitchName"
   $vm | Get-VMNetworkAdapter | Connect-VMNetworkAdapter -SwitchName "$virtualSwitchName"
 }
 
-#will default to enabling spoofing as I might use macvlans
+#will default to enabling spoofing as I use macvlans
 if (!$DisableVMMacAddressSpoofing) {  
   Write-Verbose "Enable mac spoofing"
   $vm | Set-VMNetworkAdapter -MacAddressSpoofing On
+}
+
+#set vlan
+if (-not [string]::IsNullOrEmpty($vlan)) {
+  $vm | Get-VMNetworkAdapter | Set-VMNetworkAdapterVlan -Access -VlanId $vlan
 }
 
 #guest will default to 'Microsoft Windows' template so don't set for windows
