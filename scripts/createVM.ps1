@@ -15,10 +15,11 @@ param(
   [uint64] $vmMinimumBytes = 1024MB,
   [uint64] $vmMaximumBytes = 8192MB,
   [uint64] $VHDSizeBytes = 100GB,
-  [string] $VirtualSwitchName = "ext wifi",
+  [Parameter(mandatory=$true)]
+  [string] $vSwitch,
   [switch] $DisableVMMacAddressSpoofing,
   [string] $NetInterface = "eth0",
-  [string] $vlan = "1020",
+  [string] $vlan="",
   #new vm params
   [Parameter(mandatory=$true)]
   [string] $vmName,
@@ -66,10 +67,10 @@ if ($vmDynamicMemoryEnabled) {
 }
 
 Write-Verbose "Add nic"
-if ([string]::IsNullOrEmpty($virtualSwitchName)) {
+if ([string]::IsNullOrEmpty($vSwitch)) {
   throw "vswitch not specified, please use parameter -virtualSwitchName 'Switch Name'."
 } else {
-  $vm | Get-VMNetworkAdapter | Connect-VMNetworkAdapter -SwitchName "$virtualSwitchName"
+  $vm | Get-VMNetworkAdapter | Connect-VMNetworkAdapter -SwitchName "$vSwitch"
 }
 
 #will default to enabling spoofing as I use macvlans

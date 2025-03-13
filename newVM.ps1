@@ -76,8 +76,31 @@ if ($windows) {
   $adminPwd = Read-Host "Enter Windows admin pwd"
 }
 
+
+#prompt for h-v switch
+$vSwitches = Get-VMSwitch | Select-Object -ExpandProperty Name
+
+for ($i = 0; $i -lt $vSwitches.Count; $i++) {
+    Write-Host "$($i + 1): $($vSwitches[$i])"
+}
+
+do {
+    $selection = Read-Host "Enter the number corresponding to the virtual switch"
+    $index = [int]$selection - 1
+    if ($index -lt 0 -or $index -ge $vSwitches.Count) {
+        Write-Host "Invalid selection. Please enter a number between 1 and $($vSwitches.Count)." -ForegroundColor Red
+    }
+} while ($index -lt 0 -or $index -ge $vSwitches.Count)
+
+$vSwitch = $vSwitches[$index]
+
+#prompt for vlan
+$vlan = Read-Host "Enter VLAN ID (or press Enter for none)"
+
+if ([string]::IsNullOrWhiteSpace($vlan)) { $vlan = "" }
+
 $vmFolder = Join-Path $hostVMFolder $hostname
-& .\scripts\createVM.ps1 -vmName $hostname -vmFolder "$vmFolder"  -vhdx "$sourceVHDX" -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false -bWindows $windows
+& .\scripts\createVM.ps1 -vmName $hostname -vmFolder "$vmFolder"  -vhdx "$sourceVHDX" -vSwitch $vSwitch -vlan $vlan -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false -bWindows $windows
 $vhdx = $(Get-VMHardDiskDrive -VMName $hostname).Path
 
 if ($windows) {
