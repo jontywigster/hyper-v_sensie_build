@@ -17,7 +17,7 @@ $ErrorActionPreference = 'Stop'
 
 $parentDirectory = Split-Path -Path $PSScriptRoot -Parent
 $ciCfgPath = (Join-Path $parentDirectory "cloud_init_cfg")
-$ciCfgPath = wsl -u root -- wslpath -a "$ciCfgPath"
+$ciCfgPath = wsl bash -c "wslpath -a -u '$ciCfgPath'"
 
 $mntID = [System.Guid]::NewGuid().ToString()
 Write-Host "Mounting $vhdx to /mnt/wsl/$mntID"
