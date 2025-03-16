@@ -28,7 +28,10 @@ $aOS = @(
   New-Object System.Management.Automation.Host.ChoiceDescription "&1 alma", "Enter 1 for alma"
   New-Object System.Management.Automation.Host.ChoiceDescription "&2 debian", "Enter 2 for debian"
   New-Object System.Management.Automation.Host.ChoiceDescription "&3 debianAz", "Enter 3 for debian azure image"
-  New-Object System.Management.Automation.Host.ChoiceDescription "&4 ubuntu", "Enter 4 for ubuntu"
+  #as of 16/03/25, ubuntu cloud image needs a reboot before h-v integration works
+  #and a build is slow as there's a timeout of h-v integration during initial install
+  #will not handle for now
+  #New-Object System.Management.Automation.Host.ChoiceDescription "&4 ubuntu", "Enter 4 for ubuntu"
   New-Object System.Management.Automation.Host.ChoiceDescription "&5 ubuntuAz", "Enter 5 for ubuntu azure image"
   New-Object System.Management.Automation.Host.ChoiceDescription "25sc", "Enter 25sc for Windows 2025_Standard_Core"
   New-Object System.Management.Automation.Host.ChoiceDescription "25dc", "Enter 25dc for Windows 2025_DC_Core"
@@ -49,21 +52,26 @@ do {
 
 Write-Host "os is $os"
 
-function promptInstallDocker {
-  $msg = "Install Docker?"
-  $y = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes/Enter", "Y - install Docker"
-  $n = New-Object System.Management.Automation.Host.ChoiceDescription "&No", "N - do not install Docker"
-  
-  $options = [System.Management.Automation.Host.ChoiceDescription[]]($y, $n)
-  $prompt = $host.ui.PromptForChoice($msg, "", $options, 0)
-
-  switch ($prompt) {
-    0 { return "docker" }
-    1 { return "nodocker" }
+#prompt for role
+function promptSelectRole {
+  $roles = @{
+    1 = "docker"
+    2 = "none"
   }
+
+  $msg = "Add role?"
+  $options = @()
+  foreach ($key in ($roles.Keys | Sort-Object)) {
+    $roleDescription = "&$key - $($roles[$key])"
+    $options += New-Object System.Management.Automation.Host.ChoiceDescription $roleDescription, "Select $($roles[$key])"
+  }
+
+  $prompt = $host.ui.PromptForChoice($msg, "", $options, 0)
+  return $roles[$prompt + 1]
 }
+
 if (!$windows) {
-  $bInstallDocker = promptInstallDocker
+  $role = promptSelectRole
 }
 
 #ensure image downloaded, and converted to vhdx
@@ -75,7 +83,6 @@ $hostname = & .\scripts\PromptHostname.ps1 -defaultHostname $defaultHostname
 if ($windows) {
   $adminPwd = Read-Host "Enter Windows admin pwd"
 }
-
 
 #prompt for vswitch
 $vSwitches = Get-VMSwitch | Select-Object -ExpandProperty Name
@@ -91,11 +98,11 @@ do {
       $vSwitch = $vSwitches[$index]
     }
   }
-  if ($null -eq $vSwitch) { Write-Host "Invalid, enter again"  }
+  if ($null -eq $vSwitch) { Write-Host "Invalid, enter again" }
 } while ($null -eq $vSwitch)
 
 #prompt for vlan
-$vlan = Read-Host "Enter vlan id or press enter for none"
+$vlan = Read-Host "Enter vlan id/enter for none"
 $vlan = if ([string]::IsNullOrWhiteSpace($vlan)) { "" } else { $vlan }
 
 #create vm
@@ -107,23 +114,26 @@ if ($windows) {
   & .\scripts\injectWinUnattend.ps1 -vhdx $vhdx -os $os -hostname $hostname -adminPwd $adminPwd
 }
 else {
-  & ".\scripts\wslSeedCloudInit.ps1" -hostname $hostname -os $os -buildType $bInstallDocker
+  & ".\scripts\wslSeedCloudInit.ps1" -hostname $hostname -os $os -role $role
 }
 
 Start-VM -Name $hostname
 if (!$windows) {
-  #call hvc explicitly so window is closed automatically
   wt --title "sensie-build_$hostname" hvc.exe serial $hostname
 }
-
+4
 & .\scripts\pollBuildProgress.ps1 -vmName $hostname -windows $windows
-& .\scripts\shutdownVM.ps1 -vmName $hostname
 Set-VM -CheckpointType Production -Name $hostname
-Checkpoint-VM -SnapshotName "sensie build snap before first boot" -Name $hostname
+Checkpoint-VM -SnapshotName "sensie build snap" -Name $hostname
 
 $startVm = Read-Host "Connect to VM $($hostname)? (y/n)"
 if ($startVm -eq 'y' -or [string]::IsNullOrEmpty($startVm)) {
-  Start-VM -Name $hostname
-  wt --title "sensie-build_$hostname" hvc.exe serial $hostname
-  #Start-Process "vmconnect" "localhost", "$hostname"
+  if ($windows) { 
+    Start-Process "vmconnect" "localhost", "$hostname" 
+  } 
+  else 
+  { wt --title "sensie-build_$hostname" hvc.exe serial $hostname }
+}
+else {
+  Stop-VM -name $hostname
 }

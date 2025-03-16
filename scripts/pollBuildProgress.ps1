@@ -69,6 +69,7 @@ function prettyPrint($buildStatus) {
        "dock" {$pretty="Docker install"; Break }
        "done" {$pretty="done"; Break }
        "inan" {$pretty="cloud-init runcmd"; Break }
+       "pull" {$pretty="call ansible-pull"; Break }
        "rena" {$pretty="Rename host"; Break }
   }
   return $pretty
@@ -100,4 +101,3 @@ while ($buildStatus -ne "done") {
 }
 
 $VerbosePreference = $verbosePref
-#return $true

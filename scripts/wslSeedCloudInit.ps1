@@ -10,7 +10,7 @@ param(
   [Parameter(mandatory = $true)]
   [string] $os,
   [Parameter(mandatory = $true)]
-  [string] $buildType
+  [string] $role
 )
 
 $ErrorActionPreference = 'Stop'
@@ -54,14 +54,21 @@ wsl -u root -- sed -i -e $sedCommand $vmSeedPath/*
 
 $packagesPerOS = . .\scripts\packagesPerOS.ps1
 $osPackages = $packagesPerOS[$os]
-$osPackagesString = [string]::Join("`n  - ", $osPackages)
-$osPackagesString = "  - " + $osPackagesString + "`n"
-$osPackagesString = $osPackagesString -replace '/', '\/' -replace '&', '\\&' -replace '\n', '\\n' -replace '\r', '\\r'
-$sedCommand = 's/{packagesPerOS}/' + $osPackagesString + '/g'
+
+if ($osPackages.Count -gt 0) {
+  $osPackagesString = [string]::Join("`n  - ", $osPackages)
+  $osPackagesString = "  - " + $osPackagesString + "`n"
+  $osPackagesString = $osPackagesString -replace '/', '\/' -replace '&', '\\&' -replace '\n', '\\n' -replace '\r', '\\r'
+  $sedCommand = 's/{packagesPerOS}/' + $osPackagesString + '/g'
+} else {
+  $sedCommand = 's/{packagesPerOS}//g'
+}
+
 wsl -u root -- sed -i -e $sedCommand --posix $vmSeedPath/user-data
 
-wsl -u root -- sed -i -e "s/{buildType}/$buildType/g" $vmSeedPath/user-data
+wsl -u root -- sed -i -e "s/{role}/$role/g" $vmSeedPath/user-data
 wsl -u root -- sed -i -e "s/{hostname}/$hostname/g" $vmSeedPath/user-data
+wsl -u root -- sed -i -e "s/{os}/$os/g" $vmSeedPath/user-data
 
 #Write-Host "Entering image chrooted to /mnt/wsl/$mntID. ctrl+d to exit" -f Green
 #wsl -u root chroot /mnt/wsl/$mntID

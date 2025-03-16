@@ -1,5 +1,6 @@
 $alma = @(
-    "hyperv-daemons"
+    "hyperv-daemons",
+    "yum-utils"
 )
 
 $debian = @(
@@ -14,6 +15,8 @@ $debianAz = @(
    "keyboard-configuration"
    ,"console-setup"
    ,"cron"
+   ,"net-tools"
+   ,"dnsutils"
    ,"ansible"
 )
 

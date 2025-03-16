@@ -70,10 +70,9 @@ runcmd:
   - which apt && rm -f /var/log/waagent.log
   - which dnf && localectl set-keymap de
   - which dnf && dnf config-manager --set-enabled crb; dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm; dnf install -y htop ansible
-  - ansible-pull -i {hostname}, -d /opt/sensie_build -U https://github.com/jontywigster/sensie_build.git -e build={buildType}
-
-
-
-
+  - test -f /etc/gai.conf || touch /etc/gai.conf
+  - grep -qxF 'precedence ::ffff:0:0/96  100' /etc/gai.conf || echo 'precedence ::ffff:0:0/96  100' >> /etc/gai.conf
+  - printf "sensie_build%0500dpull%02044d" | tr '0' '\0' > /var/lib/hyperv/.kvp_pool_1
+  - ansible-pull -i {hostname}, -d /opt/sensie_build -U https://github.com/jontywigster/sensie_build.git -e build={role} -e os={os}
 
 
