@@ -28,10 +28,7 @@ $aOS = @(
   New-Object System.Management.Automation.Host.ChoiceDescription "&1 alma", "Enter 1 for alma"
   New-Object System.Management.Automation.Host.ChoiceDescription "&2 debian", "Enter 2 for debian"
   New-Object System.Management.Automation.Host.ChoiceDescription "&3 debianAz", "Enter 3 for debian azure image"
-  #as of 16/03/25, ubuntu cloud image needs a reboot before h-v integration works
-  #and a build is slow as there's a timeout of h-v integration during initial install
-  #will not handle for now
-  #New-Object System.Management.Automation.Host.ChoiceDescription "&4 ubuntu", "Enter 4 for ubuntu"
+  New-Object System.Management.Automation.Host.ChoiceDescription "&4 ubuntu", "Enter 4 for ubuntu"
   New-Object System.Management.Automation.Host.ChoiceDescription "&5 ubuntuAz", "Enter 5 for ubuntu azure image"
   New-Object System.Management.Automation.Host.ChoiceDescription "25sc", "Enter 25sc for Windows 2025_Standard_Core"
   New-Object System.Management.Automation.Host.ChoiceDescription "25dc", "Enter 25dc for Windows 2025_DC_Core"
@@ -90,15 +87,23 @@ if ($vSwitches -isnot [System.Array]) { $vSwitches = @($vSwitches) }
 $vSwitch = $null
 
 for ($i = 0; $i -lt $vSwitches.Count; $i++) { Write-Host "$($i + 1): $($vSwitches[$i])" }
+
 do {
-  $selection = Read-Host "Enter vswitch number"
-  if (-not [string]::IsNullOrWhiteSpace($selection) -and $selection -as [int]) {
-    $index = [int]$selection - 1
-    if ($index -ge 0 -and $index -lt $vSwitches.Count) {
-      $vSwitch = $vSwitches[$index]
+  $selection = Read-Host "Enter vswitch number/enter for $($vSwitches[0])"
+  
+  if (-not [string]::IsNullOrWhiteSpace($selection)) {
+    if ($selection -as [int]) {
+      $index = [int]$selection - 1
+      if ($index -ge 0 -and $index -lt $vSwitches.Count) {
+        $vSwitch = $vSwitches[$index]
+      }
     }
+  } else {
+    #default to first entry if enter pressed
+    $vSwitch = $vSwitches[0]
   }
-  if ($null -eq $vSwitch) { Write-Host "Invalid, enter again" }
+  
+  if ($null -eq $vSwitch) { Write-Host "Invalid selection, enter again" }
 } while ($null -eq $vSwitch)
 
 #prompt for vlan
