@@ -16,15 +16,15 @@ This is for my own personal home network but if anything is useful (apart from t
 ## A Rough Outline of Caching
 For use without Node-Red (explained below), entries in build.env can be commented out, and the URLs would be used directly instead. 
 
-I'm really only interested in running the latest cloud images of a few distros, Alma Linux, Debian and Ubuntu, and the Azure variants of Debian and Ubuntu
+I'm really only interested in running the latest cloud images of a few distros, Alma Linux, Debian and Ubuntu, and the Azure variants of Debian and Ubuntu.
 
-Node-Red which (nightly and the result is cached) figures out what the latest version of each is
+Node-Red which (nightly and the result is cached) figures out what the latest version of each is.
 
-When newVm.ps1 starts, a prompt appears to choose the OS. When selected, Node-Red is contacted to get the URL and version number
+When newVm.ps1 starts, a prompt appears to choose the OS. When selected, Node-Red is contacted to get the URL and version number.
 
-The image is downloaded and cached in Hyper-V's disk storage location, renamed to include the version, and converted to a VHDX also named to include the version
+The image is downloaded and cached in Hyper-V's disk storage location, renamed to include the version, and converted to a VHDX also named to include the version.
 
-If the cache already contains the converted VHDX, this is used subsequently to build a VM. If this 'output' VHDX doesn't exist, or a newer version of the OS is available, the image is downloaded and converted, and this new 'output' VHDX is used to build a VM
+If the cache already contains the converted VHDX, this is used subsequently to build a VM. If this 'output' VHDX doesn't exist, or a newer version of the OS is available, the image is downloaded and converted, and this new 'output' VHDX is used to build a VM.
 
 For Windows, the same Node-Red logic is used to check for a newer version but, instead of downloading from Microsoft, my NAS is woken and a Windows ISO is downloaded from it. This is then converted to a VHDX and the same caching logic applies. 
 
