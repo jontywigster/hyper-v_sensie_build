@@ -1,4 +1,4 @@
-Another set of hyper-v scripts to build Linux and Windows VMs.
+Another set of hyper-v scripts to build Linux and Windows VMs. Server 2025-only right now.
 
 Originally based on https://github.com/schtritoff/hyperv-vm-provisioning - many thanks indeed.
 
@@ -6,6 +6,8 @@ This is for my own personal home network but if anything is useful (apart from t
 
 
 ## Creating a VM
+- NB - Only Server 2025 can be used right now. The code to select which variant is particularly janky still, I'll improve this later
+
 - newVM.ps1 prompts for the OS, VM name/hostname, which Hyper-V virtual switch to use, if a VLAN should be used (one NIC only), and a 'role' (explained below) to be added. For Windows, the admin password is prompted for too, in a horribly insecure way. 
 
 - The process requires admin rights. If newVM.ps1 isn't running as admin, after a prompt for elevation is accepted, the script comtinues in a new window
