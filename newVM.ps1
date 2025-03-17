@@ -53,7 +53,8 @@ Write-Host "os is $os"
 function promptSelectRole {
   $roles = @{
     1 = "docker"
-    2 = "none"
+    2 = "podman"
+    3 = "none"
   }
 
   $msg = "Add role?"
