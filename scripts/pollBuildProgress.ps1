@@ -70,7 +70,7 @@ function prettyPrint($buildStatus) {
        "done" {$pretty="done"; Break }
        "inan" {$pretty="cloud-init runcmd"; Break }
        "pull" {$pretty="call ansible-pull"; Break }
-       "rena" {$pretty="Rename host"; Break }
+       "rebo" {$pretty="rebooted"; Break }
   }
   return $pretty
 }
@@ -84,7 +84,7 @@ if ($windows) {
 $previousStatus = $buildStatus
 
 while ($buildStatus -ne "done") {
-    Start-Sleep -Seconds 5
+    Start-Sleep -Seconds 1
 
     $buildStatus = ($windows) ? $(getWindowsKVPBuildStatus) : $(prettyPrint(getKVPBuildStatus))
 

@@ -124,6 +124,7 @@ else {
 
 Start-VM -Name $hostname
 #if (!$windows) {
+#  call wt directly so it will close automatically on vm shutdown
 #  wt --title "sensie-build_$hostname" hvc.exe serial $hostname
 #}
 

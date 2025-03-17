@@ -16,7 +16,7 @@ param(
 $VerbosePreference = 'SilentlyContinue'
 $ErrorActionPreference = 'Stop'
 
-# Get default Virtual Hard Disk path (requires administrative privileges)
+# Get default VHD path, requires admin privs
 $VMStoragePath = (Get-VMHost).VirtualHardDiskPath
 if (-not $VMStoragePath) { throw "Couldn't get VMStoragePath from Get-VMHost, quitting" }
 Write-Verbose "VirtualHardDiskPath: $VMStoragePath"

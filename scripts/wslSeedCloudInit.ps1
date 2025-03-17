@@ -71,7 +71,7 @@ wsl -u root -- sed -i -e "s/{hostname}/$hostname/g" $vmSeedPath/user-data
 wsl -u root -- sed -i -e "s/{os}/$os/g" $vmSeedPath/user-data
 
 #Write-Host "Entering image chrooted to /mnt/wsl/$mntID. ctrl+d to exit" -f Green
-#wsl -u root chroot /mnt/wsl/$mntID
+wsl -u root chroot /mnt/wsl/$mntID
 
 write-host "will unmount - "
 write-host "wsl --unmount \\?\$vhdx"
