@@ -26,7 +26,7 @@ When newVm.ps1 starts, a prompt appears to choose the OS. When selected, Node-Re
 
 The image is downloaded and cached in Hyper-V's disk storage location, renamed to include the version, and converted to a VHDX also named to include the version.
 
-If the cache already contains the converted VHDX, this is used subsequently to build a VM. If this 'output' VHDX doesn't exist, or a newer version of the OS is available, the image is downloaded and converted, and this new 'output' VHDX is used to build a VM.
+If the cache already contains the converted VHDX, this is used so there's no download or conversion. If a newer version of the OS is available, the image is downloaded, converted and renamed, and this newly-converted VHDX is then used. 
 
 For Windows, the same Node-Red logic is used to check for a newer version but, instead of downloading from Microsoft, my NAS is woken and a Windows ISO is downloaded from it. This is then converted to a VHDX and the same caching logic applies. 
 
