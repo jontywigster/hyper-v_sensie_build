@@ -32,7 +32,7 @@ For Windows, the same Node-Red logic is used to check for a newer version but, i
 
 
 ## Converting a Windows ISO to a VHDX
-I originally built Windows VMs from WDS but, among other things, had to wait to a Windows VM to POST then boot via PXE. This took a while. While searching for alternatives I came across https://github.com/fdcastel/Hyper-V-Automation. It's superb and what you should be looking at. 
+I originally built Windows VMs from WDS but, among other things, had to wait fora a Windows VM to POST then boot via PXE. This took a while. While searching for alternatives I came across https://github.com/fdcastel/Hyper-V-Automation. It's superb and what you should be looking at. 
 
 Many thanks indeed to fdcastel and the original author! 
 
