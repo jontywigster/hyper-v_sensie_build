@@ -5,27 +5,29 @@ $alma = @(
 
 $debian = @(
     "keyboard-configuration"
-    ,"console-setup"
-    ,"cron"
-    ,"hyperv-daemons"
-    ,"ansible"
+    , "console-setup"
+    , "cron"
+    , "hyperv-daemons"
+    , "net-tools"
+    , "dnsutils"
+    , "ansible"
 )
 
 $debianAz = @(
-   "keyboard-configuration"
-   ,"console-setup"
-   ,"cron"
-   ,"net-tools"
-   ,"dnsutils"
-   ,"ansible"
+    "keyboard-configuration"
+    , "console-setup"
+    , "cron"
+    , "net-tools"
+    , "dnsutils"
+    , "ansible"
 )
 
 $ubuntu = @(
-   "linux-azure"
-   ,"linux-virtual"
-   ,"linux-cloud-tools-virtual"
-   ,"linux-tools-virtual"
-   ,"ansible"
+    "linux-azure"
+    , "linux-virtual"
+    , "linux-cloud-tools-virtual"
+    , "linux-tools-virtual"
+    , "ansible"
 )
 
 $ubuntuAz = @(
@@ -33,9 +35,9 @@ $ubuntuAz = @(
 )
 
 return @{
-    alma      = $alma
-    debian    = $debian
-    debianAz  = $debianAz
-    ubuntu    = $ubuntu
-    ubuntuAz  = $ubuntuAz
+    alma     = $alma
+    debian   = $debian
+    debianAz = $debianAz
+    ubuntu   = $ubuntu
+    ubuntuAz = $ubuntuAz
 }

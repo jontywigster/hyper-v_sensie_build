@@ -123,10 +123,10 @@ else {
 }
 
 Start-VM -Name $hostname
-if (!$windows) {
-  wt --title "sensie-build_$hostname" hvc.exe serial $hostname
-}
-4
+#if (!$windows) {
+#  wt --title "sensie-build_$hostname" hvc.exe serial $hostname
+#}
+
 & .\scripts\pollBuildProgress.ps1 -vmName $hostname -windows $windows
 Set-VM -CheckpointType Production -Name $hostname
 Checkpoint-VM -SnapshotName "sensie build snap" -Name $hostname
