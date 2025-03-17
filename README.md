@@ -20,7 +20,7 @@ For use without Node-Red (explained below), entries in build.env can be commente
 
 I'm really only interested in running the latest cloud images of a few distros, Alma Linux, Debian and Ubuntu, and the Azure variants of Debian and Ubuntu.
 
-Node-Red which (nightly and the result is cached) figures out what the latest version of each is.
+Node-Red figures out (nightly and the result is cached) what the latest version of each is.
 
 When newVm.ps1 starts, a prompt appears to choose the OS. When selected, Node-Red is contacted to get the URL and version number.
 
