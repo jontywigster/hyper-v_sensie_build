@@ -84,7 +84,7 @@ if ($windows) {
 $previousStatus = $buildStatus
 
 while ($buildStatus -ne "done") {
-    Start-Sleep -Seconds 1
+    Start-Sleep -Seconds 3
 
     $buildStatus = ($windows) ? $(getWindowsKVPBuildStatus) : $(prettyPrint(getKVPBuildStatus))
 

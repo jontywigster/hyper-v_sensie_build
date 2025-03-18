@@ -44,7 +44,7 @@ Although fantastic, I prefer not to create a temporary CD-ROM for Cloud-Init. In
 
 
 ## Roles
-At the moment there are two - Docker or None. One adds Docker, via Ansible, and the other doesn't add Docker. This seems a bit pointless but I plan to add Podman and k3s as options and Ansible makes this fairly easy. 
+At the moment there are three - Docker, Podman or None. Docker or Podman are installed via Ansible. None doesn't install either.  
 
 
 ## Hyper-V Guest Data Exchange
