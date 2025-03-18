@@ -50,11 +50,12 @@ At the moment there are three - Docker, Podman or None. Docker or Podman are ins
 ## Hyper-V Guest Data Exchange
 Although I'd like a VM to be created (after prompts) automatically, I'd like a rough idea of progress. The process uses Hyper-V's guest data exchange to send a few simple messages back to the PowerShell terminal that's running newVM.ps1. 
 
-This requires the hyper-V integration to be working in the VM. It isn't always so I get around it by using Ansible...
+This requires the hyper-V integration to be working in the VM. It isn't always which I get around by using Ansible.
 
 
 ## Ansible
-The cloud-init user-data file calls ansible-pull, which basically handles rebooting for Alma Linux and Ubuntu, where the Hyper-V integration seems not to be able to exchange data with the host until after a reboot. It also installs Docker if chosen. 
+The cloud-init user-data file calls ansible-pull, which basically handles rebooting for Alma Linux and Ubuntu, where the Hyper-V integration seems not to be able to exchange data with the host until after a reboot. It also installs whichever role was chosen. 
+
 
 ## This is for me
 I wasn't planning on making this repo public because of the jankiness. However, I saw someone asking for caching in another repo, and maybe something here would be useful as a start
