@@ -50,6 +50,7 @@ packages:
   - tmux
   - mc
   - dos2unix
+  - bash-completion
 {packagesPerOS}
 
 cloud_config_modules:
