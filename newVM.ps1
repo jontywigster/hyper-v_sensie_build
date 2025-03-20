@@ -133,6 +133,8 @@ Start-VM -Name $hostname
 Set-VM -CheckpointType Production -Name $hostname
 Checkpoint-VM -SnapshotName "sensie build snap" -Name $hostname
 
+Get-VM -Name hostname | Get-VMNetworkAdapter | Select-Object VMName, IPAddresses
+
 $startVm = Read-Host "Connect to VM $($hostname)? (y/n)"
 if ($startVm -eq 'y' -or [string]::IsNullOrEmpty($startVm)) {
   if ($windows) { 
