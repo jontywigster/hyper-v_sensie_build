@@ -143,7 +143,7 @@ if ($startVm -eq 'y' -or [string]::IsNullOrEmpty($startVm)) {
   } 
   else 
   { 
-    wt --title "$hostname" ssh.exe -i "$HOME\.ssh\wigster" wigster@$guestIpAddress
+    wt --title "$hostname" ssh.exe -i "$HOME\.ssh\wigster" wigster@$guestIpAddress.FirstIPv4
   }
 }
 else {
