@@ -133,7 +133,7 @@ Start-VM -Name $hostname
 Set-VM -CheckpointType Production -Name $hostname
 Checkpoint-VM -SnapshotName "sensie build snap" -Name $hostname
 
-$guestIpAddress = Get-VM -Name hostname | Get-VMNetworkAdapter | Select-Object VMName, @{Name="FirstIPv4";Expression={($_.IPAddresses | Where-Object { $_ -match '^\d{1,3}(\.\d{1,3}){3}$' } | Select-Object -First 1)}}
+$guestIpAddress = Get-VM -Name $hostname | Get-VMNetworkAdapter | Select-Object VMName, @{Name="FirstIPv4";Expression={($_.IPAddresses | Where-Object { $_ -match '^\d{1,3}(\.\d{1,3}){3}$' } | Select-Object -First 1)}}
 
 
 $startVm = Read-Host "Connect to VM $($hostname)? (y/n)"
