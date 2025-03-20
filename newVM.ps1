@@ -133,8 +133,7 @@ Start-VM -Name $hostname
 Set-VM -CheckpointType Production -Name $hostname
 Checkpoint-VM -SnapshotName "sensie build snap" -Name $hostname
 
-$guestIpAddress = Get-VM -Name $hostname | Get-VMNetworkAdapter | Select-Object VMName, @{Name="FirstIPv4";Expression={($_.IPAddresses | Where-Object { $_ -match '^\d{1,3}(\.\d{1,3}){3}$' } | Select-Object -First 1)}}
-
+$guestIpAddress = (Get-VM -Name $hostname | Get-VMNetworkAdapter | Select-Object -ExpandProperty IPAddresses | Where-Object { $_ -match '^\d{1,3}(\.\d{1,3}){3}$' } | Select-Object -First 1)
 
 $startVm = Read-Host "Connect to VM $($hostname)? (y/n)"
 if ($startVm -eq 'y' -or [string]::IsNullOrEmpty($startVm)) {
@@ -143,7 +142,7 @@ if ($startVm -eq 'y' -or [string]::IsNullOrEmpty($startVm)) {
   } 
   else 
   { 
-    wt --title "$hostname" ssh.exe -i "$HOME\.ssh\wigster" wigster@$guestIpAddress.FirstIPv4
+    wt --title "$hostname" ssh.exe -i "$HOME\.ssh\wigster" wigster@$guestIpAddress
   }
 }
 else {
