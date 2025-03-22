@@ -90,7 +90,7 @@ $vSwitch = $null
 for ($i = 0; $i -lt $vSwitches.Count; $i++) { Write-Host "$($i + 1): $($vSwitches[$i])" }
 
 do {
-  $selection = Read-Host "Enter vswitch number/enter for $($vSwitches[0])"
+  $selection = Read-Host "Enter vswitch number/Enter for $($vSwitches[0])"
   
   if (-not [string]::IsNullOrWhiteSpace($selection)) {
     if ($selection -as [int]) {
@@ -99,7 +99,8 @@ do {
         $vSwitch = $vSwitches[$index]
       }
     }
-  } else {
+  }
+  else {
     #default to first entry if enter pressed
     $vSwitch = $vSwitches[0]
   }
@@ -107,13 +108,26 @@ do {
   if ($null -eq $vSwitch) { Write-Host "Invalid selection, enter again" }
 } while ($null -eq $vSwitch)
 
-#prompt for vlan
-$vlan = Read-Host "Enter vlan id/enter for none"
-$vlan = if ([string]::IsNullOrWhiteSpace($vlan)) { "" } else { $vlan }
+
+# Prompt the user to set a trunk port by specifying a native VLAN, or choose no trunk
+$nativeVlan = Read-Host "Enter native VLAN ID/Enter or n for no trunk"
+
+if (-not [string]::IsNullOrWhiteSpace($nativeVlan) -and $nativeVlan -ne "n") {
+    # Trunk native VLAN ID provided, prompt for AllowedVlanIdList
+    $allowedVlanIdList = Read-Host "supply AllowedVlanIdList (e.g., 1-100), or Enter for all 1-4094)"
+
+    # If AllowedVlanIdList is empty, set a default range
+    $allowedVlanIdList = if ([string]::IsNullOrWhiteSpace($allowedVlanIdList)) { "1-4094" } else { $allowedVlanIdList }
+} else {
+    #no trunk, prompt for vlan
+    $vlan = Read-Host "Enter VLAN ID for access mode/press Enter for none"
+    $vlan = if ([string]::IsNullOrWhiteSpace($vlan)) { "" } else { $vlan }
+}
+
 
 #create vm
 $vmFolder = Join-Path $hostVMFolder $hostname
-& .\scripts\createVM.ps1 -vmName $hostname -vmFolder "$vmFolder"  -vhdx "$sourceVHDX" -vSwitch $vSwitch -vlan $vlan -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false -bWindows $windows
+& .\scripts\createVM.ps1 -vmName $hostname -vmFolder "$vmFolder"  -vhdx "$sourceVHDX" -vSwitch $vSwitch -vlan $vlan -nativeVlan $nativeVlan -allowedVlanIdList $allowedVlanIdList -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false -bWindows $windows
 $vhdx = $(Get-VMHardDiskDrive -VMName $hostname).Path
 
 if ($windows) {
@@ -140,8 +154,7 @@ if ($startVm -eq 'y' -or [string]::IsNullOrEmpty($startVm)) {
   if ($windows) { 
     Start-Process "vmconnect" "localhost", "$hostname" 
   } 
-  else 
-  { 
+  else { 
     wt --title "$hostname" ssh.exe -i "$HOME\.ssh\wigster" wigster@$guestIpAddress
   }
 }
