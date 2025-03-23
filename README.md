@@ -40,21 +40,17 @@ That repo uses a script to convert an ISO to a VHDX but I found I couldn't use i
 
 
 ## Cloud-Init 
-Although fantastic, I prefer not to create a temporary CD-ROM for Cloud-Init. Instead Cloud-Init's 'seeding' is used by copying files into a Linux guest via WSL. Although commented out so the installation is automated, the guest can be entered into during a build, chrooted to the root of the Linux filesystem. 
+Although fantastic, I prefer not to create a temporary CD-ROM for Cloud-Init. Instead Cloud-Init's 'seeding' is used by copying files into a Linux guest via WSL. Although commented out (see #wsl -u root chroot /mnt/wsl/$mntID in wslSeedCloudInit.ps1) so the installation is automated, the guest can be entered into during a build, chrooted to the root of the Linux filesystem. 
 
 
 ## Roles
-At the moment there are three - Docker, Podman or None. Docker or Podman are installed via Ansible. None doesn't install either.  
+At the moment there are two - Docker and Podman. Whichever is selected gets installed via Ansible. If 'none' is chosen, Ansible is not installed.
 
 
-## Hyper-V Guest Data Exchange
-Although I'd like a VM to be created (after prompts) automatically, I'd like a rough idea of progress. The process uses Hyper-V's guest data exchange to send a few simple messages back to the PowerShell terminal that's running newVM.ps1. 
+## Hyper-V Guest Data Exchange vs Serial Port Output
+Although I'd like a VM to be created (after prompts) automatically, I'd also like a rough idea of progress. I used to use Hyper-V's guest data exchange to send a few simple messages back to the PowerShell terminal that's running newVM.ps1. However, this requires the hyper-V integration to be working in the VM. For the latest Alma Linux, Debian Azure, and Ubuntu cloud images at the time of writing, this integration is not available until after a reboot.
 
-This requires the hyper-V integration to be working in the VM. It isn't always which I get around by using Ansible.
-
-
-## Ansible
-The cloud-init user-data file calls ansible-pull, which basically handles rebooting for Alma Linux and Ubuntu, where the Hyper-V integration seems not to be able to exchange data with the host until after a reboot. It also installs whichever role was chosen. 
+Instead, the serial console is monitored and some simple output is shown to provide an overview of progress.
 
 
 ## This is for me

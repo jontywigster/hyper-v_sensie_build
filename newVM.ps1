@@ -90,7 +90,7 @@ $vSwitch = $null
 for ($i = 0; $i -lt $vSwitches.Count; $i++) { Write-Host "$($i + 1): $($vSwitches[$i])" }
 
 do {
-  $selection = Read-Host "Enter vswitch number/Enter for $($vSwitches[0])"
+  $selection = Read-Host "Enter vswitch number / Enter for $($vSwitches[0])"
   
   if (-not [string]::IsNullOrWhiteSpace($selection)) {
     if ($selection -as [int]) {
@@ -110,7 +110,7 @@ do {
 
 
 # Prompt the user to set a trunk port by specifying a native VLAN, or choose no trunk
-$nativeVlan = Read-Host "Enter native VLAN ID/Enter or n for no trunk"
+$nativeVlan = Read-Host "Enter trunk native vlan id / Enter or n for no trunk"
 
 if (-not [string]::IsNullOrWhiteSpace($nativeVlan) -and $nativeVlan -ne "n") {
     # Trunk native VLAN ID provided, prompt for AllowedVlanIdList
@@ -120,7 +120,7 @@ if (-not [string]::IsNullOrWhiteSpace($nativeVlan) -and $nativeVlan -ne "n") {
     $allowedVlanIdList = if ([string]::IsNullOrWhiteSpace($allowedVlanIdList)) { "1-4094" } else { $allowedVlanIdList }
 } else {
     #no trunk, prompt for vlan
-    $vlan = Read-Host "Enter VLAN ID for access mode/press Enter for none"
+    $vlan = Read-Host "Enter access mode vlan id / Enter for none"
     $vlan = if ([string]::IsNullOrWhiteSpace($vlan)) { "" } else { $vlan }
 }
 
@@ -138,12 +138,16 @@ else {
 }
 
 Start-VM -Name $hostname
-#if (!$windows) {
-#  call wt directly so it will close automatically on vm shutdown
-#  wt --title "sensie-build_$hostname" hvc.exe serial $hostname
-#}
+if (!$windows) {
+  #call wt directly so it will close automatically on vm shutdown
+  #wt --title "sensie-build_$hostname" hvc.exe serial $hostname
+}
 
-& .\scripts\pollBuildProgress.ps1 -vmName $hostname -windows $windows
+& .\scripts\pollBuildProgress.ps1 -vmName $hostname
+
+exit
+
+
 Set-VM -CheckpointType Production -Name $hostname
 Checkpoint-VM -SnapshotName "sensie build snap" -Name $hostname
 

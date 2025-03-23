@@ -63,15 +63,14 @@ cloud_final_modules:
   - scripts-user
 
 runcmd:
-  - printf "sensie_build%0500dinan%02044d" | tr '0' '\0' > /var/lib/hyperv/.kvp_pool_1
   - [ cp, /root/.vimrc, /home/wigster/.vimrc ]
   - [ chown, wigster:wigster, /home/wigster/.vimrc ]
   - which apt && apt -y remove walinuxagent
   - which apt && rm -rf /var/lib/waagent
   - which apt && rm -f /var/log/waagent.log
   - which dnf && localectl set-keymap de
-  - which dnf && dnf config-manager --set-enabled crb; dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm; dnf install -y htop ansible
-  - printf "sensie_build%0500dpull%02044d" | tr '0' '\0' > /var/lib/hyperv/.kvp_pool_1
-  - ansible-pull -i {hostname}, -d /opt/sensie_build -U https://github.com/jontywigster/sensie_build.git -e build={role} -e os={os}
-
+  - which dnf && dnf config-manager --set-enabled crb; dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm; dnf install -y htop
+  - which dnf && dnf install -y ansible
+  - echo "ansible pull" > /dev/ttyS0
+  - ansible-pull -i {hostname}, -d /opt/sensie_build -U https://github.com/jontywigster/sensie_build.git -e build={role} -e os={os}  -e os={os} -e kvp_flag_enabled=false -e serial_port_enabled=true
 

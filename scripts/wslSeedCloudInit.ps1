@@ -70,6 +70,11 @@ wsl -u root -- sed -i -e "s/{role}/$role/g" $vmSeedPath/user-data
 wsl -u root -- sed -i -e "s/{hostname}/$hostname/g" $vmSeedPath/user-data
 wsl -u root -- sed -i -e "s/{os}/$os/g" $vmSeedPath/user-data
 
+if ($role -eq "none") {
+  # Use WSL to run sed and delete lines containing 'ansible'
+  wsl -u root -- sed -i '/ansible/d' $vmSeedPath/user-data
+} 
+
 #Write-Host "Entering image chrooted to /mnt/wsl/$mntID. ctrl+d to exit" -f Green
 #wsl -u root chroot /mnt/wsl/$mntID
 

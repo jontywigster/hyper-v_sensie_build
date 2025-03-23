@@ -23,7 +23,7 @@ if (-not $hostVMFolder) {
 Write-host "ensure vm $($vm.Name) stopped, removed"
 $oldWarningPreference = $WarningPreference
 $WarningPreference = "SilentlyContinue"
-Stop-VM -Name $vmName -Force -ErrorAction SilentlyContinue > $null
+Stop-VM -Name $vmName -TurnOff -ErrorAction SilentlyContinue > $null
 $WarningPreference = $oldWarningPreference
 
 Get-VMSnapshot -VMName $vmName  | Remove-VMSnapshot -IncludeAllChildSnapshots

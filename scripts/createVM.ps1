@@ -99,8 +99,6 @@ elseif (-not [string]::IsNullOrEmpty($vlan)) {
   Write-Host "Access VLAN configuration applied. VLAN ID: $vlan"
 }
 
-
-
 #guest will default to 'Microsoft Windows' template so don't set for windows
 if ($vmGeneration -eq 2 -and $bSecureBoot -and !$bWindows) {
   Write-Host "Set secureboot to MicrosoftUEFICertificateAuthority"
@@ -116,10 +114,9 @@ if (($vmGeneration -eq 2) -and ($(Get-VMHost).EnableEnhancedSessionMode)) {
 # Enable copy/paste over vmbus
 $vm | Get-VMIntegrationService -Name "Guest Service Interface" | Enable-VMIntegrationService
 
-# redirect com port for VM serial output
-Write-Verbose "Add com port - "
-Write-Verbose "\\.\pipe\$vmName-com1"
+#com port
 $vm | Set-VMComPort -Path \\.\pipe\$vmName-com1 -Number 1
+#$vm | Set-VMComPort -Path \\.\pipe\$vmName-comBuild -Number 2
 
 if ($bCheckpoints) {
   #set prod checkpoints, will fall back to standard if not supported in guest 

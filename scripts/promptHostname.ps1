@@ -16,7 +16,7 @@ do {
     else {
         $vm = Get-VM -Name $hostname -ErrorAction SilentlyContinue
         if ($vm) {
-            $response = Read-Host "A VM with name $hostname already exists. Continue and overwrite? (y or empty/n to enter new name)"
+            $response = Read-Host "A VM with name $hostname already exists. Continue and overwrite? Enter or y / n to enter new name"
             $response = $response.Trim()
             if ([string]::IsNullOrEmpty($response)) {
                 $response = "y"

@@ -3,101 +3,70 @@
 
 [CmdletBinding()]
 param(
-  [Parameter(mandatory = $true)]
-  [string] $vmName,
-  [switch[]] $windows
+    [Parameter(mandatory = $true)]
+    [string] $vmName
 )
 
-$verbosePref=(Get-Variable -Name VerbosePreference).Value
+#$pipePath = "\\.\pipe\$vmName-comBuild"
+$pipePath = "\\.\pipe\$vmName-com1"
+Write-Host "wait for serial connection to vm"
 
-Import-Module Hyper-V
-Write-Host "Waiting for build to start"
-
-function getKVPBuildStatus {
-  $vm = Get-CimInstance -Namespace "root\virtualization\v2" -ClassName "Msvm_ComputerSystem" -Filter "ElementName = '$vmName'"
-  $kvpData = Get-CimInstance -Namespace "root\virtualization\v2" -ClassName "Msvm_KvpExchangeComponent" | Where-Object { $_.SystemName -eq $vm.Name }
-
-  if ($kvpData.GuestExchangeItems.count -eq 0) {
-    return "no gei"
-  }
-  else {
-    #if the guest writes multiple keys, GuestExchangeItems is not valid XML
-    #bodge regex instead
-      
-    $guestExchangeItemsString = [string]$kvpData.GuestExchangeItems
-    $instances = $guestExchangeItemsString -split '</INSTANCE>'
-
-    foreach ($instance in $instances) {
-      if ($instance -match '<VALUE>sensie_build</VALUE>') {
-        #$dataValue = $instance -match '<PROPERTY NAME="Data" TYPE="string"><VALUE>(.*?)</VALUE>'
-        $instance -match '<PROPERTY NAME="Data" TYPE="string"><VALUE>(.*?)</VALUE>'
-        if ($matches[1]) {
-          return $($matches[1])
-        }
-      }
-    }
-  }
+# Define the mapping of patterns to actions
+$mapping = @{
+    "*Cloud-init * running 'init-local'" = "begin"
+    "*Cloud-init * running 'init'*"      = "bring up network"
+    "*Cloud-init * 'modules:config'*"    = "install OS updates"
+    "*Cloud-init * 'modules:final'*"     = "runcmd"
+    "*Setting up ansible *"              = "install ansible"
+    "*ansible pull*"                     = "pull ansible playbook"
+    "*Reached target*cloud-init.target*" = "done"
 }
 
-function getWindowsKVPBuildStatus {
-  $vm = Get-WmiObject -Namespace root\virtualization\v2 -Class Msvm_ComputerSystem -Filter "ElementName='$vmName'"
+$pipeContent = @()
+$lineCounter = 0
 
-  #get KVP Exchange Component
-  $kvpComponent = Get-WmiObject -Namespace root\virtualization\v2 -Query "Associators of {$vm} Where AssocClass=Msvm_SystemDevice ResultClass=Msvm_KvpExchangeComponent"
-  $kvpValues = $kvpComponent.GuestExchangeItems
+try {
+    $pipeStream = New-Object System.IO.Pipes.NamedPipeClientStream(".", $pipePath.Split("\")[-1], [System.IO.Pipes.PipeDirection]::In)
+    $pipeStream.Connect(5000) # wait up to 5 seconds for connection
+    $reader = New-Object System.IO.StreamReader($pipeStream)
 
-  if ($null -ne $kvpValues) {
-    $kvpValues | Where-Object { $_ -ne $null } | ForEach-Object {
-      $kvpXml = [xml]$_
-      $name = $kvpXml.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Name']/VALUE").InnerText
-      if ($name -eq "sensie_build") {
-          $data = $kvpXml.SelectSingleNode("/INSTANCE/PROPERTY[@NAME='Data']/VALUE").InnerText
-          #Write-Host "here $data"
-          return $data
-      }
-    }
-  } else {
-    Write-Host "The variable \$kvpValues is null."
-  }
-}
+    Write-Host "connected, wait for cloud-init"
+    while ($pipeStream.IsConnected -and !$reader.EndOfStream) {
+        $line = $reader.ReadLine().Trim()
+        if ($line) {
+            $pipeContent += $line
+            $lineCounter++
+            #Write-Host "$line"
 
-function prettyPrint($buildStatus) {
-  switch ($buildStatus) {
-       "no gei" {$pretty="Waiting for OS"; Break }
-       "base" {$pretty="Ansible build"; Break }
-       "circ" {$pretty="cloud-init started"; Break }
-       "dock" {$pretty="Docker install"; Break }
-       "done" {$pretty="done"; Break }
-       "inan" {$pretty="cloud-init runcmd"; Break }
-       "pull" {$pretty="call ansible-pull"; Break }
-       "rebo" {$pretty="rebooted"; Break }
-  }
-  return $pretty
-}
-
-if ($windows) {
-  $buildStatus = getWindowsKVPBuildStatus 
-} else {
-  $buildStatus = getKVPBuildStatus
-}
-
-$previousStatus = $buildStatus
-
-while ($buildStatus -ne "done") {
-    Start-Sleep -Seconds 3
-
-    $buildStatus = ($windows) ? $(getWindowsKVPBuildStatus) : $(prettyPrint(getKVPBuildStatus))
-
-    if ($null -eq $buildStatus) {
-        Write-Host -NoNewline "."
-    } else {
-        if ($buildStatus -eq $previousStatus) {
-            Write-Host -NoNewline "."
-        } else {
-            Write-Host "`r`n$($buildStatus)"
-            $previousStatus = $buildStatus
+            #build done, close pipe to end
+            if ($line -like "*Reached target*cloud-init.target*") {
+                Write-Host "done"
+                $pipeStream.Close() 
+            }
+            else {
+                # output mapping text if there's a match
+                foreach ($key in $mapping.Keys) {
+                    if ($line -like $key) {
+                        Write-Host "`n$($mapping[$key])"
+                        break
+                    }
+                    else {
+                        if ($lineCounter % 50 -eq 0) { Write-Host "." -NoNewline }
+                    }
+                }
+            }
         }
     }
 }
+catch {
+    return "Failed to connect to named pipe: $pipePath. Error: $_"
+}
+finally {
+    if ($pipeStream -and $pipeStream.IsConnected) {
+        $pipeStream.Close()
+    }
+}
 
-$VerbosePreference = $verbosePref
+#Write-Host "`nComplete Pipe Content:"
+#$pipeContent | ForEach-Object { Write-Host $_ }
+return "done"
