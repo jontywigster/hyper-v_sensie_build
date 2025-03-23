@@ -32,11 +32,11 @@ For Windows, the same Node-Red logic is used to check for a newer version but, i
 
 
 ## Converting a Windows ISO to a VHDX
-I originally built Windows VMs from WDS but, among other things, had to wait for a Windows VM to POST then boot via PXE. This took a while. While searching for alternatives I came across https://github.com/fdcastel/Hyper-V-Automation. It's superb and what you should be looking at. 
+I originally built Windows VMs from WDS but, among other things, had to wait for a Windows VM to POST then boot via PXE. This took a while. While searching for alternatives I came across https://github.com/fdcastel/Hyper-V-Automation. It's superb. 
 
-Many thanks indeed to fdcastel and the original author! 
+That repo uses a script to convert an ISO to a VHDX but I found I couldn't use it in PowerShell Core. For no good reason, I didn't want to be limited so converted that script to something which works in Core. It should be noted - right now, the Windows ISO is mounted, as is the VHDX file, and are temporarily visible in Explorer. I plan to think about an alternative at some point.
 
-That repo uses a script to convert an ISO to a VHDX but I found I couldn't use it in PowerShell Core. For no good reason, I didn't want to be limited so converted that script to something which works in PoSh Core. It should be noted - right now, the Windows ISO is mounted, as is the VHDX file, and are temporarily visible in Explorer. I plan to think about an alternative at some point.
+Many thanks indeed to fdcastel and the original conversion script author! 
 
 
 ## Cloud-Init 
