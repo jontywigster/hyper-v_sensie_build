@@ -42,7 +42,8 @@ Many thanks indeed to fdcastel and the original conversion script author!
 
 
 ## Cloud-Init 
-Although fantastic, I prefer not to create a temporary CD-ROM for Cloud-Init as debugging might leave files around. Instead Cloud-Init's 'seeding' is used by copying files into a Linux guest via WSL. Although commented out (see #wsl -u root chroot /mnt/wsl/$mntID in wslSeedCloudInit.ps1) so the installation is automated, uncommenting that line will enter the guest, chrooted to the root of the Linux filesystem, before cloud-init starts. 
+Although fantastic, I prefer not to create a temporary CD-ROM for Cloud-Init as debugging might leave files around. Instead Cloud-Init's 'seeding' is used by copying files into a Linux guest via WSL. Uncommenting 
+```#wsl -u root chroot /mnt/wsl/$mntID``` in wslSeedCloudInit.ps1 will enter the guest, chrooted to the root of the Linux filesystem, before cloud-init starts. 
 
 
 ## Roles
