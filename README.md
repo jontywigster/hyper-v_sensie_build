@@ -6,27 +6,29 @@ This is for my own personal home network but if anything is useful (apart from t
 
 
 ## Creating a VM
-- NB - Only Server 2025 can be used right now. The code to select which variant is particularly janky still, I'll improve this later
-
-- newVM.ps1 prompts for the OS, VM name/hostname, which Hyper-V virtual switch to use, if a VLAN should be used (one NIC only), and a 'role' (explained below) to be added. For Windows, the admin password is prompted for too, in a horribly insecure way
+- newVM.ps1 prompts for the OS, VM name/hostname, which Hyper-V virtual switch to use, if a VLAN should be used (whether for a trunk or an access port), and a 'role' (explained below) to be added. For Windows, the admin password is prompted for too, in a horribly insecure way
 
 - The process requires admin rights. If newVM.ps1 isn't running as admin, after a prompt for elevation is accepted, the script comtinues in a new window
+
+- NB - Only Server 2025 can be used right now. The code to select which variant is particularly janky but I'll improve this later
 
 - All the other scripts were moved to the scripts directory to make clear which script starts the process
 
 
-## A Rough Outline of Caching
-For use without Node-Red (explained below), entries in build.env can be commented out, and the URLs would be used directly instead. 
+## Caching
+NB - for use without Node-Red (explained below), entries in build.env can be uncommented, and the URLs would be used directly instead. 
 
-I'm really only interested in running the latest cloud images of a few distros, Alma Linux, Debian and Ubuntu, and the Azure variants of Debian and Ubuntu.
+I'm interested in running the latest cloud images of a few distros, Alma Linux, Debian and Ubuntu, and the Azure variants of Debian and Ubuntu.
 
 Node-Red figures out (nightly and the result is cached) what the latest version of each is.
 
 When newVm.ps1 starts, a prompt appears to choose the OS. When selected, Node-Red is contacted to get the URL and version number.
 
-The image is downloaded and cached in Hyper-V's disk storage location, renamed to include the version, and converted to a VHDX also named to include the version.
+If the image isn't already downloaded, it's retrieved and cached in Hyper-V's disk storage location, renamed to include the version, and converted to a VHDX also named to include the version.
 
-If the cache already contains the converted VHDX, this is used so there's no download or conversion. If a newer version of the OS is available, the image is downloaded, converted and renamed, and this newly-converted VHDX is then used. 
+If the cache already contains the converted VHDX, this is used so there's no download or conversion. 
+
+If a newer version of the OS is available, the image is downloaded, converted and renamed, and this newly-converted VHDX is then used, inluding for any subsequent build. 
 
 For Windows, the same Node-Red logic is used to check for a newer version but, instead of downloading from Microsoft, my NAS is woken and a Windows ISO is downloaded from it. This is then converted to a VHDX and the same caching logic applies. 
 
@@ -40,18 +42,19 @@ Many thanks indeed to fdcastel and the original conversion script author!
 
 
 ## Cloud-Init 
-Although fantastic, I prefer not to create a temporary CD-ROM for Cloud-Init. Instead Cloud-Init's 'seeding' is used by copying files into a Linux guest via WSL. Although commented out (see #wsl -u root chroot /mnt/wsl/$mntID in wslSeedCloudInit.ps1) so the installation is automated, the guest can be entered into during a build, chrooted to the root of the Linux filesystem. 
+Although fantastic, I prefer not to create a temporary CD-ROM for Cloud-Init as debugging might leave files around. Instead Cloud-Init's 'seeding' is used by copying files into a Linux guest via WSL. Although commented out (see #wsl -u root chroot /mnt/wsl/$mntID in wslSeedCloudInit.ps1) so the installation is automated, uncommenting that line will enter the guest, chrooted to the root of the Linux filesystem, before cloud-init starts. 
 
 
 ## Roles
-At the moment there are two - Docker and Podman. Whichever is selected gets installed via Ansible. If 'none' is chosen, Ansible is not installed.
+At the moment there are three - docker, podman, none. Selecting docker or podman installs that via Ansible. If 'none' is chosen, Ansible is not installed.
 
 
 ## Hyper-V Guest Data Exchange vs Serial Port Output
 Although I'd like a VM to be created (after prompts) automatically, I'd also like a rough idea of progress. I used to use Hyper-V's guest data exchange to send a few simple messages back to the PowerShell terminal that's running newVM.ps1. However, this requires the hyper-V integration to be working in the VM. For the latest Alma Linux, Debian Azure, and Ubuntu cloud images at the time of writing, this integration is not available until after a reboot.
 
-Instead, the serial console is monitored and some simple output is shown to provide an overview of progress.
+Instead, the serial console is monitored and some simple output is shown to provide an overview of progress. After cloud-init's finished, an email is sent with the console output as an attachment. 
 
+To ensure the Hyper-V integration is available after a build completes, distros that require a reboot are restarted automatically and the script waits for the VM to be running. 
 
 ## This is for me
 I wasn't planning on making this repo public because of the jankiness. However, I saw someone asking for caching in another repo, and maybe something here would be useful as a start

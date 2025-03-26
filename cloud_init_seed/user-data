@@ -40,8 +40,8 @@ write_files:
 
 disable_root: true
 
-package_update: true
-package_upgrade: true
+package_update: false
+package_upgrade: false
 
 packages:
   - git
@@ -65,12 +65,15 @@ cloud_final_modules:
 runcmd:
   - [ cp, /root/.vimrc, /home/wigster/.vimrc ]
   - [ chown, wigster:wigster, /home/wigster/.vimrc ]
-  - which apt && apt -y remove walinuxagent
-  - which apt && rm -rf /var/lib/waagent
-  - which apt && rm -f /var/log/waagent.log
-  - which dnf && localectl set-keymap de
-  - which dnf && dnf config-manager --set-enabled crb; dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm; dnf install -y htop
-  - which dnf && dnf install -y ansible
+  - which apt && apt -y remove walinuxagent || echo "skipping deb-based task"
+  - which apt && rm -rf /var/lib/waagent || echo "skipping deb-based task"
+  - which apt && rm -f /var/log/waagent.log || echo "skipping deb-based task"
+  - grep -qi "alma" /etc/os-release && dnf config-manager --set-enabled crb || echo "skipping rhel-based task"
+  - grep -qi "alma" /etc/os-release && dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm || echo "skipping rhel-based task"
+  - grep -qi "alma" /etc/os-release && dnf install -y htop || echo "skipping rhel-based task"
+  - grep -qi "alma" /etc/os-release && dnf install -y ansible || echo "skipping rhel-based task"
+  - grep -qi "alma" /etc/os-release && localectl set-keymap de || echo "skipping rhel-based task"
   - echo "ansible pull" > /dev/ttyS0
   - ansible-pull -i {hostname}, -d /opt/sensie_build -U https://github.com/jontywigster/sensie_build.git -e build={role} -e os={os}  -e os={os} -e kvp_flag_enabled=false -e serial_port_enabled=true
+  - echo "my IP addresses: $(ip -o addr show | awk '{print $2, $4}' | tr '\n' ' ')" > /dev/ttyS0
 

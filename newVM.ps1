@@ -110,18 +110,19 @@ do {
 
 
 # Prompt the user to set a trunk port by specifying a native VLAN, or choose no trunk
-$nativeVlan = Read-Host "Enter trunk native vlan id / Enter or n for no trunk"
+$nativeVlan = Read-Host "Enter trunk port native vlan id / Enter or n for no trunk"
 
 if (-not [string]::IsNullOrWhiteSpace($nativeVlan) -and $nativeVlan -ne "n") {
-    # Trunk native VLAN ID provided, prompt for AllowedVlanIdList
-    $allowedVlanIdList = Read-Host "supply AllowedVlanIdList (e.g., 1-100), or Enter for all 1-4094)"
+  # Trunk native VLAN ID provided, prompt for AllowedVlanIdList
+  $allowedVlanIdList = Read-Host "supply AllowedVlanIdList (e.g., 1-100), or Enter for all 1-4094)"
 
-    # If AllowedVlanIdList is empty, set a default range
-    $allowedVlanIdList = if ([string]::IsNullOrWhiteSpace($allowedVlanIdList)) { "1-4094" } else { $allowedVlanIdList }
-} else {
-    #no trunk, prompt for vlan
-    $vlan = Read-Host "Enter access mode vlan id / Enter for none"
-    $vlan = if ([string]::IsNullOrWhiteSpace($vlan)) { "" } else { $vlan }
+  # If AllowedVlanIdList is empty, set a default range
+  $allowedVlanIdList = if ([string]::IsNullOrWhiteSpace($allowedVlanIdList)) { "1-4094" } else { $allowedVlanIdList }
+}
+else {
+  #no trunk, prompt for vlan
+  $vlan = Read-Host "Enter access port vlan id / Enter for none"
+  $vlan = if ([string]::IsNullOrWhiteSpace($vlan)) { "" } else { $vlan }
 }
 
 
@@ -138,22 +139,29 @@ else {
 }
 
 Start-VM -Name $hostname
-if (!$windows) {
-  #call wt directly so it will close automatically on vm shutdown
-  #wt --title "sensie-build_$hostname" hvc.exe serial $hostname
+
+$buildResult = & .\scripts\watchConsole.ps1 -vmName $hostname
+#h-v LIS not available on some distros until reboot
+if ($os -in @("alma")) {
+  & .\scripts\rebootGuestAndWaitForBoot.ps1 -vmName $hostname
 }
 
-& .\scripts\pollBuildProgress.ps1 -vmName $hostname
+#ipv6 local net not up right now, will use ipv6 address instead when available
+#$guestIpAddress = (Get-VM -Name $hostname | Get-VMNetworkAdapter | Select-Object -ExpandProperty IPAddresses | Where-Object { $_ -match '^\d{1,3}(\.\d{1,3}){3}$' } | Select-Object -First 1)
+do {
+  $allAdaptersIpAddresses = (Get-VMNetworkAdapter -VMName $hostname).IPAddresses
+  if ($allAdaptersIpAddresses) {
+      $guestIpAddress = $allAdaptersIpAddresses | Where-Object { $_ -match '^\d{1,3}(\.\d{1,3}){3}$' } | Select-Object -First 1
+  }
+  Start-Sleep -Seconds 1
+} while (-not $guestIpAddress)
 
-exit
-
+& .\scripts\mailBuildResult.ps1 -vmName $hostname -buildResult $buildResult -guestIpAddress $guestIpAddress
 
 Set-VM -CheckpointType Production -Name $hostname
 Checkpoint-VM -SnapshotName "sensie build snap" -Name $hostname
 
-$guestIpAddress = (Get-VM -Name $hostname | Get-VMNetworkAdapter | Select-Object -ExpandProperty IPAddresses | Where-Object { $_ -match '^\d{1,3}(\.\d{1,3}){3}$' } | Select-Object -First 1)
-
-$startVm = Read-Host "Connect to VM $($hostname)? (y/n)"
+$startVm = Read-Host "Connect to VM $($hostname)? Enter or y /n"
 if ($startVm -eq 'y' -or [string]::IsNullOrEmpty($startVm)) {
   if ($windows) { 
     Start-Process "vmconnect" "localhost", "$hostname" 

@@ -12,7 +12,7 @@ param(
   [int] $vmProcessorCount = 4,
   [bool] $vmDynamicMemoryEnabled = $true,
   [uint64] $vmMemoryStartupBytes = 4096MB,
-  [uint64] $vmMinimumBytes = 1024MB,
+  [uint64] $vmMinimumBytes = 4096MB,
   [uint64] $vmMaximumBytes = 8192MB,
   [uint64] $VHDSizeBytes = 100GB,
   [Parameter(mandatory = $true)]
