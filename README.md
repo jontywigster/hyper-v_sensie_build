@@ -28,7 +28,7 @@ If the image isn't already downloaded, it's retrieved and cached in Hyper-V's di
 
 If the cache already contains the converted VHDX, this is used so there's no download or conversion. 
 
-If a newer version of the OS is available, the image is downloaded, converted and renamed, and this newly-converted VHDX is then used, inluding for any subsequent build. 
+If a newer version of the OS is available, the image is downloaded, converted and renamed, and this newly-converted VHDX is then used, including for any subsequent build. 
 
 For Windows, the same Node-Red logic is used to check for a newer version but, instead of downloading from Microsoft, my NAS is woken and a Windows ISO is downloaded from it. This is then converted to a VHDX and the same caching logic applies. 
 
