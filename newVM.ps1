@@ -147,7 +147,7 @@ if ($os -in @("alma")) {
 }
 
 #ipv6 local net not up right now, will use ipv6 address instead when available
-#$guestIpAddress = (Get-VM -Name $hostname | Get-VMNetworkAdapter | Select-Object -ExpandProperty IPAddresses | Where-Object { $_ -match '^\d{1,3}(\.\d{1,3}){3}$' } | Select-Object -First 1)
+$guestIpAddress = $null
 do {
   $allAdaptersIpAddresses = (Get-VMNetworkAdapter -VMName $hostname).IPAddresses
   if ($allAdaptersIpAddresses) {
@@ -161,8 +161,8 @@ do {
 Set-VM -CheckpointType Production -Name $hostname
 Checkpoint-VM -SnapshotName "sensie build snap" -Name $hostname
 
-$startVm = Read-Host "Connect to VM $($hostname)? Enter or y /n"
-if ($startVm -eq 'y' -or [string]::IsNullOrEmpty($startVm)) {
+$connectVM = Read-Host "Connect to VM $($hostname)? Enter or y /n"
+if ($connectVM -eq 'y' -or [string]::IsNullOrEmpty($connectVM)) {
   if ($windows) { 
     Start-Process "vmconnect" "localhost", "$hostname" 
   } 
