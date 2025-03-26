@@ -51,7 +51,7 @@ At the moment there are three - docker, podman, none. Selecting docker or podman
 
 
 ## Hyper-V Guest Data Exchange vs Serial Port Output
-Although I'd like a VM to be created (after prompts) automatically, I'd also like a rough idea of progress. I used to use Hyper-V's guest data exchange to send a few simple messages back to the PowerShell terminal that's running newVM.ps1. However, this requires the hyper-V integration to be working in the VM. For the latest Alma Linux, Debian Azure, and Ubuntu cloud images at the time of writing, this integration is not available until after a reboot.
+Although I'd like a VM to be created (after prompts) automatically, I'd also like a rough idea of progress. I used to use Hyper-V's guest data exchange to send a few simple messages back to the PowerShell terminal that's running newVM.ps1. However, this requires the Hyper-V integration to be working in the VM. For the latest Alma Linux, Debian Azure, and Ubuntu cloud images at the time of writing, this integration is not available until after a reboot.
 
 Instead, the serial console is monitored and some simple output is shown to provide an overview of progress. After cloud-init's finished, an email is sent with the console output as an attachment. 
 
