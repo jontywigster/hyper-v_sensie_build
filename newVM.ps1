@@ -114,7 +114,7 @@ $nativeVlan = Read-Host "Enter trunk port native vlan id / Enter or n for no tru
 
 if (-not [string]::IsNullOrWhiteSpace($nativeVlan) -and $nativeVlan -ne "n") {
   # Trunk native VLAN ID provided, prompt for AllowedVlanIdList
-  $allowedVlanIdList = Read-Host "supply AllowedVlanIdList (e.g., 1-100), or Enter for all 1-4094)"
+  $allowedVlanIdList = Read-Host "Enter AllowedVlanIdList (e.g., 1-100), or Enter for all 1-4094)"
 
   # If AllowedVlanIdList is empty, set a default range
   $allowedVlanIdList = if ([string]::IsNullOrWhiteSpace($allowedVlanIdList)) { "1-4094" } else { $allowedVlanIdList }
