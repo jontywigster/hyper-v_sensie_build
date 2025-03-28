@@ -140,7 +140,12 @@ else {
 
 Start-VM -Name $hostname
 
-$buildResult = & .\scripts\watchConsole.ps1 -vmName $hostname
+if ($windows) {
+  $buildResult = & .\scripts\pollBuildProgressKVP.ps1 -vmName $hostname -windows $true
+} else {
+  $buildResult = & .\scripts\watchConsole.ps1 -vmName $hostname
+}
+
 #h-v LIS not available on some distros until reboot
 if ($os -in @("alma")) {
   & .\scripts\rebootGuestAndWaitForBoot.ps1 -vmName $hostname
