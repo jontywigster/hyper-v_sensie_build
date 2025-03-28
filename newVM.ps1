@@ -135,9 +135,9 @@ else {
 if ($windows) { 
   #create template vm if it doesn't exist
   Write-Output "refresh windows template vm"
-  $templateVM = & .\scripts\refreshWinTemplate.ps1 -sourceVHDX $sourceVHDX -edition $os -vSwitch "$vSwitch"
+  $templateVMName = & .\scripts\refreshWinTemplate.ps1 -sourceVHDX $sourceVHDX -edition $os -vSwitch "$vSwitch"
   Write-Output "clone template vm"
-  & .\scripts\cloneVm.ps1 -sourceVmName $templateVm.Name -cloneVmName $hostname
+  & .\scripts\cloneVm.ps1 -sourceVmName $templateVMName -cloneVmName $hostname
 }
 else {
   & .\scripts\createVM.ps1 -vmName $hostname -vmFolder "S(Join-Path $hostVMFolder $hostname)"  -vhdx "$sourceVHDX" -vSwitch $vSwitch -vlan $vlan -nativeVlan $nativeVlan -allowedVlanIdList $allowedVlanIdList -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false -bWindows $windows

@@ -56,4 +56,4 @@ Start-Process "vmconnect" "localhost", $vmName
 
 Save-VM -Name $vmName
 
-return $vm
+return $vmName
