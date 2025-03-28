@@ -3,12 +3,14 @@
 [CmdletBinding()]
 param(
     [Parameter(mandatory=$true)]    
-    [string[]] $vmName
+    [string] $vmName
 )
 
 $vm = Get-VM -VMName "$vmName" -ErrorAction 'SilentlyContinue'
 
 if (!($vm)) { return "" }
+
+& .\scripts\closeWindow.ps1 -windowTitleToMatch $($vmName + " * Virtual Machine Connection")
 
 $VMStoragePath = (Get-VMHost).VirtualHardDiskPath
 if (-not $VMStoragePath) {

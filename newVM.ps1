@@ -75,12 +75,19 @@ if (!$windows) {
 #ensure image downloaded, and converted to vhdx
 $sourceVHDX = & .\scripts\downloadImage.ps1 -os $os -windows $windows
 
+
 $defaultHostname = If ($windows) { $options[$prompt].Label } Else { $(Split-Path -Path $sourceVHDX -Leaf).Replace("-source.vhdx", "").Replace(".", "") }
 $hostname = & .\scripts\PromptHostname.ps1 -defaultHostname $defaultHostname
 
 if ($windows) {
-  $adminPwd = Read-Host "Enter Windows admin pwd"
+  do {
+      $adminPwd = Read-Host "Enter admin password for $hostname"
+      if (-not $adminPwd) {
+          Write-Output "Password is mandatory, please enter it"
+      }
+  } while (-not $adminPwd)
 }
+
 
 #prompt for vswitch
 $vSwitches = Get-VMSwitch | Select-Object -ExpandProperty Name
@@ -125,24 +132,28 @@ else {
   $vlan = if ([string]::IsNullOrWhiteSpace($vlan)) { "" } else { $vlan }
 }
 
-
-#create vm
-$vmFolder = Join-Path $hostVMFolder $hostname
-& .\scripts\createVM.ps1 -vmName $hostname -vmFolder "$vmFolder"  -vhdx "$sourceVHDX" -vSwitch $vSwitch -vlan $vlan -nativeVlan $nativeVlan -allowedVlanIdList $allowedVlanIdList -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false -bWindows $windows
-$vhdx = $(Get-VMHardDiskDrive -VMName $hostname).Path
-
-if ($windows) {
-  & .\scripts\injectWinUnattend.ps1 -vhdx $vhdx -os $os -hostname $hostname -adminPwd $adminPwd
+if ($windows) { 
+  #create template vm if it doesn't exist
+  Write-Output "refresh windows template vm"
+  $templateVM = & .\scripts\refreshWinTemplate.ps1 -sourceVHDX $sourceVHDX -edition $os -vSwitch "$vSwitch"
+  Write-Output "clone template vm"
+  & .\scripts\cloneVm.ps1 -sourceVmName $templateVm.Name -cloneVmName $hostname
 }
 else {
+  & .\scripts\createVM.ps1 -vmName $hostname -vmFolder "S(Join-Path $hostVMFolder $hostname)"  -vhdx "$sourceVHDX" -vSwitch $vSwitch -vlan $vlan -nativeVlan $nativeVlan -allowedVlanIdList $allowedVlanIdList -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false -bWindows $windows
+}
+
+
+if (!$windows) {
   & ".\scripts\wslSeedCloudInit.ps1" -hostname $hostname -os $os -role $role
 }
 
 Start-VM -Name $hostname
 
 if ($windows) {
-  $buildResult = & .\scripts\pollBuildProgressKVP.ps1 -vmName $hostname -windows $true
-} else {
+  $buildResult = & .\scripts\adjustWinClone.ps1 -vmName $hostname -NewAdminPwd $adminPwd
+}
+else {
   $buildResult = & .\scripts\watchConsole.ps1 -vmName $hostname
 }
 
@@ -156,7 +167,7 @@ $guestIpAddress = $null
 do {
   $allAdaptersIpAddresses = (Get-VMNetworkAdapter -VMName $hostname).IPAddresses
   if ($allAdaptersIpAddresses) {
-      $guestIpAddress = $allAdaptersIpAddresses | Where-Object { $_ -match '^\d{1,3}(\.\d{1,3}){3}$' } | Select-Object -First 1
+    $guestIpAddress = $allAdaptersIpAddresses | Where-Object { $_ -match '^\d{1,3}(\.\d{1,3}){3}$' } | Select-Object -First 1
   }
   Start-Sleep -Seconds 1
 } while (-not $guestIpAddress)

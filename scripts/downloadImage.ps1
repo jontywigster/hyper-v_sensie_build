@@ -91,7 +91,7 @@ if (test-path $outputVHDX) {
 
 if ($windows) {
   $os = [string]$os
-  & .\scripts\winISOToVHDX.ps1 -sourceISO $downloadFile -outputVHDX $outputVHDX -os $os
+  & .\scripts\winISOToVHDX.ps1 -sourceISO $downloadFile -outputVHDX $outputVHDX -os $os *> $null
 }
 else {
   #extract image if tar

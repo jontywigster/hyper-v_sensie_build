@@ -4,62 +4,21 @@
 [CmdletBinding()]
 param(
   [Parameter(mandatory=$true)]
-  [string] $vmId,
-  [datetime]$startDT
-
+  [string] $vmName
 )
 
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'SilentlyContinue'
 
-#set default value if startDT not supplied 
-if (-not $PSBoundParameters.ContainsKey('startDT')) { $startDT = (Get-Date) }
+write-host "wait for vm to boot"
+do {
+  #get heartbeat status
+  $heartbeat = (Get-VMIntegrationService -VMName $vmName | Where-Object Name -eq "Heartbeat").PrimaryStatusDescription
 
-$LogName = 'Microsoft-Windows-Hyper-V-Worker-Admin'
-$eventIDs = @(18500,18601,18502)
-$eventIDsString = $eventIDs -join " or EventID="
-$vmId=$vmId.ToUpper()
-
-$query = @"
-<QueryList>
-  <Query Id="0" Path="$LogName">
-    <Select Path="$LogName"> 
-    *[UserData[VmlEventLog[(VmId='$vmId')]]] 
-    and 
-    *[System[TimeCreated[@SystemTime>='$($startDT.ToUniversalTime().ToString("o"))']]] 
-    and 
-    *[System[(EventID=$eventIDsString)]]
-    </Select>
-  </Query>
-</QueryList>
-"@
-
-# Monitor the event logs for the specified event IDs and VM name using FilterXML
-$buildStatus = "Waiting for VM to boot"
-$previousStatus = ""
-$finalStatus = "*successfully booted an operating system*"
-
-Write-Host "`n$buildStatus"
-
-while ($true) {
-  $events = Get-WinEvent -FilterXML $query -ErrorAction SilentlyContinue
-  foreach ($event in $events) {
-    #Write-Host "$($event.Message)"
-    $trimMessage = $event.Message.Split("(")[0]
-    #$buildStatus = "$($event.TimeCreated): $trimMessage"
-    $buildStatus = "$trimMessage"
-
-    if ($buildStatus -ne $previousStatus) {
-      Write-Host "$buildStatus"
-      if ($buildStatus -like $finalStatus) { return "" }
-      $previousStatus = $buildStatus
-    }
-    else {
-      Write-Host -NoNewline "."
-    }
+  if ($heartbeat -ne "OK") {
+      Write-host "." -NoNewline
+      Start-Sleep -Seconds 2
   }
+} while ($heartbeat -ne "OK")
 
-  Start-Sleep -Seconds 5
-}
-
-return ""
+return $true

@@ -33,6 +33,13 @@ If a newer version of the OS is available, the image is downloaded, converted an
 For Windows, the same Node-Red logic is used to check for a newer version but, instead of downloading from Microsoft, my NAS is woken and a Windows ISO is downloaded from it. This is then converted to a VHDX and the same caching logic applies. 
 
 
+## Windows VM Templates
+When a Windows VM is to be created, a 'template' is created first. This template is created per-flavour (e.g. Standard, Datacenter, Standard Core, DC Core). This template is then cloned and the hostname in this cloned guest is updated.
+
+If the template already exists, because the flavour of Windows was used before, the template is not recreated.
+
+In other words, if a 2025 Standard Core VM was built, the second time a 2025 Standard Core VM is built, only the template is cloned. This helps speed up the process. There is a prompt to 'refresh' the template. If 'y' is entered, the template is rebuilt from scratch and would be used for subsequent builds.
+
 ## Converting a Windows ISO to a VHDX
 I originally built Windows VMs from WDS but, among other things, had to wait for a Windows VM to POST then boot via PXE. This took a while. While searching for alternatives I came across https://github.com/fdcastel/Hyper-V-Automation. It's superb. 
 
