@@ -100,7 +100,4 @@ while ($buildStatus -ne "done") {
     }
 }
 
-#temporary bodge
-return $buildStatus
-
 $VerbosePreference = $verbosePref

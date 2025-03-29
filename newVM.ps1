@@ -135,7 +135,7 @@ else {
 if ($windows) { 
   #create template vm if it doesn't exist
   Write-Output "refresh windows template vm"
-  $templateVMName = & .\scripts\refreshWinTemplate.ps1 -sourceVHDX $sourceVHDX -edition $os -vSwitch "$vSwitch"
+  $templateVMName = & .\scripts\refreshWinTemplate.ps1 -sourceVHDX "$sourceVHDX" -edition $os -vSwitch "$vSwitch"
   Write-Output "clone template vm"
   & .\scripts\cloneVm.ps1 -sourceVmName $templateVMName -cloneVmName $hostname
 }
@@ -143,12 +143,11 @@ else {
   & .\scripts\createVM.ps1 -vmName $hostname -vmFolder "S(Join-Path $hostVMFolder $hostname)"  -vhdx "$sourceVHDX" -vSwitch $vSwitch -vlan $vlan -nativeVlan $nativeVlan -allowedVlanIdList $allowedVlanIdList -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false -bWindows $windows
 }
 
-
 if (!$windows) {
   & ".\scripts\wslSeedCloudInit.ps1" -hostname $hostname -os $os -role $role
 }
 
-Start-VM -Name $hostname
+Start-VM -Name $hostname | Out-Null
 
 if ($windows) {
   $buildResult = & .\scripts\adjustWinClone.ps1 -vmName $hostname -NewAdminPwd $adminPwd
@@ -162,6 +161,8 @@ if ($os -in @("alma")) {
   & .\scripts\rebootGuestAndWaitForBoot.ps1 -vmName $hostname
 }
 
+
+
 #ipv6 local net not up right now, will use ipv6 address instead when available
 $guestIpAddress = $null
 do {
@@ -172,10 +173,11 @@ do {
   Start-Sleep -Seconds 1
 } while (-not $guestIpAddress)
 
+
 & .\scripts\mailBuildResult.ps1 -vmName $hostname -buildResult $buildResult -guestIpAddress $guestIpAddress
 
-Set-VM -CheckpointType Production -Name $hostname
-Checkpoint-VM -SnapshotName "sensie build snap" -Name $hostname
+Set-VM -CheckpointType Production -Name $hostname | Out-Null
+Checkpoint-VM -SnapshotName "sensie build snap" -Name $hostname | Out-Null
 
 $connectVM = Read-Host "Connect to VM $($hostname)? Enter or y /n"
 if ($connectVM -eq 'y' -or [string]::IsNullOrEmpty($connectVM)) {

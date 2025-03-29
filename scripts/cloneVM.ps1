@@ -21,7 +21,6 @@ if (Test-Path -Path $cloneFolder -PathType Container) {
     Remove-Item -Path $cloneFolder -Recurse -Force
 } 
 
-
 Write-Host "export source vm"
 Export-VM $sourceVmName -Path $cloneFolder
 $cloneVMCX = (Get-ChildItem "$cloneFolder\$sourceVmName" -Filter *.vmcx -Recurse | Select-Object -First 1).Fullname
@@ -42,6 +41,3 @@ $exportPath = "$cloneFolder\$SourceVMName"
 if (Test-Path $exportPath) {
     Remove-Item -Path $exportPath -Recurse -Force
 }
-
-return $cloneVm
- 

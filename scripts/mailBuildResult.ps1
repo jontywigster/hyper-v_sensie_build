@@ -11,7 +11,7 @@ param(
 $smtpServer = "mta.oc.baltsch.com"
 $port = 25
 $from = "sensiehouse@gmail.com"
-$to = "fchorley@gmail.com"
+$to = "sensiehouse@gmail.com"
 
 $subject = "$vmName Build " + ($buildResult.success ? "OK" :"Failed" )
 

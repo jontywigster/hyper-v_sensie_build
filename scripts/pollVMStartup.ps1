@@ -1,5 +1,5 @@
 #requires -Modules Hyper-V
-## #requires -RunAsAdministrator
+#requires -RunAsAdministrator
 
 [CmdletBinding()]
 param(
@@ -17,8 +17,7 @@ do {
 
   if ($heartbeat -ne "OK") {
       Write-host "." -NoNewline
-      Start-Sleep -Seconds 2
+      Start-Sleep -Seconds 1
   }
 } while ($heartbeat -ne "OK")
 
-return $true
