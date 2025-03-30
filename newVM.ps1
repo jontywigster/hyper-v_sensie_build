@@ -81,10 +81,10 @@ $hostname = & .\scripts\PromptHostname.ps1 -defaultHostname $defaultHostname
 
 if ($windows) {
   do {
-      $adminPwd = Read-Host "Enter admin password for $hostname"
-      if (-not $adminPwd) {
-          Write-Output "Password is mandatory, please enter it"
-      }
+    $adminPwd = Read-Host "Enter admin password for $hostname"
+    if (-not $adminPwd) {
+      Write-Output "Password is mandatory, please enter it"
+    }
   } while (-not $adminPwd)
 }
 
@@ -140,11 +140,11 @@ if ($windows) {
   & .\scripts\cloneVm.ps1 -sourceVmName $templateVMName -cloneVmName $hostname
 }
 else {
-  & .\scripts\createVM.ps1 -vmName $hostname -vmFolder "S(Join-Path $hostVMFolder $hostname)"  -vhdx "$sourceVHDX" -vSwitch $vSwitch -vlan $vlan -nativeVlan $nativeVlan -allowedVlanIdList $allowedVlanIdList -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false -bWindows $windows
+  $vm = & .\scripts\createVM.ps1 -vmName $hostname -vmFolder "$(Join-Path $hostVMFolder $hostname)"  -vhdx "$sourceVHDX" -vSwitch $vSwitch -vlan $vlan -nativeVlan $nativeVlan -allowedVlanIdList $allowedVlanIdList -notes "created $(Get-Date -Format "dd/MM/yyyy")" -bStartVM $false -bWindows $windows
 }
 
 if (!$windows) {
-  & ".\scripts\wslSeedCloudInit.ps1" -hostname $hostname -os $os -role $role
+  & ".\scripts\wslSeedCloudInit.ps1" -hostname $hostname -os $os -role $role -vhdx (Get-VMHardDiskDrive -VMName $vm.Name).Path
 }
 
 Start-VM -Name $hostname | Out-Null
@@ -157,7 +157,7 @@ else {
 }
 
 #h-v LIS not available on some distros until reboot
-if ($os -in @("alma")) {
+if ($os -in @("alma","debianAz")) {
   & .\scripts\rebootGuestAndWaitForBoot.ps1 -vmName $hostname
 }
 

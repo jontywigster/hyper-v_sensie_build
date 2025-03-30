@@ -28,16 +28,16 @@ Write-Host "wait for serial connection to vm"
 $mapping = @{
     "*Cloud-init * running 'init-local'"     = "begin"
     "*Cloud-init * running 'init'*"          = "bring up network"
-    "*Cloud-init * 'modules:config'*"       = "install OS updates"
-    "*Cloud-init * 'modules:final'*"        = "runcmd"
+    "*Cloud-init * 'modules:config'*"        = "install OS updates"
+    "*Cloud-init * 'modules:final'*"         = "runcmd"
     "*Setting up ansible *"                  = "install ansible"
     "ansible pull*"                          = "pull ansible playbook"
     "ansible play start"                     = "ansible play start"
     "ansible begin install *"                = "line"
-    "ansible build done for *"              = "line"
+    "ansible build done for *"               = "line"
     "*Reached target*cloud-init.target*"     = "done"
-    "*loud-init*alma*running*modules:final*" = "done"
     "*cloud-init* Failed to run module *"    = "fail"
+    "*ensie cloud-init build complet*"       = "done"
 }
 
 $pipeContent = @()
@@ -87,7 +87,7 @@ try {
                                 if ($line -ilike $key) {
                                     if ($($mapping[$key]) -eq "done") {
                                         Write-Host "`ndone" 
-                                        $success=$true
+                                        $success = $true
                                         $pipeStream.Close()
                                         #break; 
                                     }
@@ -107,7 +107,7 @@ try {
                                 }
                                 else {
                                     #output a dot for every n lines since there's so much logging
-                                    if ($lineCounter % 75 -eq 0) { Write-Host "." -NoNewline  }
+                                    if ($lineCounter % 75 -eq 0) { Write-Host "." -NoNewline }
                                 }
                             }
                         }

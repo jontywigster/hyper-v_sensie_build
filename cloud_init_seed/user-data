@@ -8,6 +8,13 @@ timezone: Europe/Berlin
 ssh_pwauth: false
 ssh_genkeytypes: [rsa, ecdsa, ed25519]
 
+manage_resolv_conf: true
+resolv_conf:
+  domain: virt.baltsch.com
+  searchdomains:
+    - baltsch.com
+    - virt.baltsch.com
+
 #requires packages for some OSs
 keyboard:
   layout: de
@@ -53,14 +60,22 @@ packages:
   - bash-completion
 {packagesPerOS}
 
+final_message: |
+  sensie cloud-init build complete
+  Version: $version
+  Timestamp: $timestamp
+  Datasource: $datasource
+
 cloud_config_modules:
+  - runcmd
+  - scripts-user
   - package_update_upgrade_install  
   - timezone
   - keyboard
+  - resolv_conf
 
 cloud_final_modules:
-  - runcmd
-  - scripts-user
+  - final_message
 
 runcmd:
   - [ cp, /root/.vimrc, /home/wigster/.vimrc ]

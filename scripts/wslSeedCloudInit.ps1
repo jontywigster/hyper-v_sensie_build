@@ -1,6 +1,5 @@
 <#
-remove existing cloud init stuff
-add ds nocloud, pointing to own http server
+mount vhdx in wsl, create seed folders, copy files, unmount vhdx
 #>
 
 [CmdletBinding()]
@@ -10,7 +9,9 @@ param(
   [Parameter(mandatory = $true)]
   [string] $os,
   [Parameter(mandatory = $true)]
-  [string] $role
+  [string] $role,
+  [Parameter(mandatory = $true)]
+  [string] $vhdx
 )
 
 $ErrorActionPreference = 'Stop'
@@ -34,8 +35,7 @@ Write-Host "seed cloud-init"
 #clean any exiting cloud-init files
 wsl -u root -- rm -fv $mntPath/etc/cloud/cloud.cfg.d/*.cfg
 
-#add config files
-
+#add cloud-init config (not seed) files
 wsl -u root -- cp -r "$ciCfgPath/." $mntPath/etc/cloud/cloud.cfg.d/
 
 #create seed dir

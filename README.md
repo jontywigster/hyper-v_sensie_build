@@ -16,7 +16,7 @@ This is for my own personal home network but if anything is useful (apart from t
 
 
 ## Caching
-NB - for use without Node-Red (explained below), entries in build.env can be uncommented, and the URLs would be used directly instead. 
+NB - for use without Node-Red (explained below), entries in build.env can be uncommented, and the URLs would be used directly instead. Adding a new entry with a hard-coded URL to the image can also be used, if a matching OS entry is added to newVm.ps1 
 
 I'm interested in running the latest cloud images of a few distros, Alma Linux, Debian and Ubuntu, and the Azure variants of Debian and Ubuntu.
 
