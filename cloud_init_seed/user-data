@@ -8,12 +8,10 @@ timezone: Europe/Berlin
 ssh_pwauth: false
 ssh_genkeytypes: [rsa, ecdsa, ed25519]
 
-manage_resolv_conf: true
-resolv_conf:
-  domain: virt.baltsch.com
-  searchdomains:
-    - baltsch.com
-    - virt.baltsch.com
+fqdn: {hostname}.virt.baltsch.com
+hostname: myhost
+prefer_fqdn_over_hostname: true
+create_hostname_file: true
 
 #requires packages for some OSs
 keyboard:
@@ -72,7 +70,7 @@ cloud_config_modules:
   - package_update_upgrade_install  
   - timezone
   - keyboard
-  - resolv_conf
+  - update_hostname
 
 cloud_final_modules:
   - final_message
