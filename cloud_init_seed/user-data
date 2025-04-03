@@ -87,5 +87,5 @@ runcmd:
   - grep -qi "alma" /etc/os-release && dnf install -y ansible || echo "skipping rhel-based task"
   - grep -qi "alma" /etc/os-release && localectl set-keymap de || echo "skipping rhel-based task"
   - echo "ansible pull" > /dev/ttyS0
-  - ansible-pull -i {hostname}, -d /opt/sensie_build -U https://github.com/jontywigster/sensie_build.git -e build={role} -e os={os}  -e os={os} -e kvp_flag_enabled=false -e serial_port_enabled=true
+  - ansible-pull -i {hostname}, -d /opt/sensie_build -U https://github.com/jontywigster/sensie_build.git -e build={role} -e os={os} -e kvp_flag_enabled=false -e serial_port_enabled=true
 
