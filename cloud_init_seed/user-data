@@ -65,12 +65,12 @@ final_message: |
   Datasource: $datasource
 
 cloud_config_modules:
+  - package_update_upgrade_install  
   - runcmd
   - scripts-user
-  - package_update_upgrade_install  
+  - update_hostname
   - timezone
   - keyboard
-  - update_hostname
 
 cloud_final_modules:
   - final_message
@@ -87,5 +87,6 @@ runcmd:
   - grep -qi "alma" /etc/os-release && dnf install -y ansible || echo "skipping rhel-based task"
   - grep -qi "alma" /etc/os-release && localectl set-keymap de || echo "skipping rhel-based task"
   - echo "ansible pull" > /dev/ttyS0
-  - ansible-pull -i {hostname}, -d /opt/sensie_build -U https://github.com/jontywigster/sensie_build.git -e build={role} -e os={os} -e kvp_flag_enabled=false -e serial_port_enabled=true -e CONTAINER_USER=wigster
+  - ansible-pull -i {hostname}, -d /opt/sensie_build -U https://github.com/jontywigster/sensie_build.git -e build={role} -e os={os} -e kvp_flag=false -e serial_flag=true -e cntnr_usr=wigster  > /var/log/ansible-pull.log 2>&1
+
 
